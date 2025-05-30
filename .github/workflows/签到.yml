@@ -1,4 +1,4 @@
-name: Daily POST Request SignIn
+name: 签到
 
 on:
   schedule:
