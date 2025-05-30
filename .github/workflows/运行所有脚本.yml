@@ -1,0 +1,63 @@
+name: 运行所有脚本
+
+on:
+  workflow_dispatch:  # 允许手动触发此工作流
+
+jobs:
+  run-scripts:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 爬楼
+        uses: actions/github-script@v4
+        with:
+          script: |
+            await github.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'Daily POST Request 24F to 1F.yml',
+              ref: 'master'  // 根据你的实际分支名称替换
+            });
+
+      - name: 答题
+        uses: actions/github-script@v4
+        with:
+          script: |
+            await github.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'Daily POST Request Question.yml',
+              ref: 'master'  
+            });
+
+      - name: 骑车
+        uses: actions/github-script@v4
+        with:
+          script: |
+            await github.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'Daily_POST_Request_Bike.yml',
+              ref: 'master'  
+            });
+
+      - name: 回收
+        uses: actions/github-script@v4
+        with:
+          script: |
+            await github.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'Daily_POST_Request_Box.yml',
+              ref: 'master'  
+            });
+
+      - name: 签到
+        uses: actions/github-script@v4
+        with:
+          script: |
+            await github.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'Daily_POST_Request_SignIn.yml',
+              ref: 'master'  
+            });
