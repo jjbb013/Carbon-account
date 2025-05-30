@@ -1,4 +1,4 @@
-name: Daily POST Request Bike
+name: 骑车
 
 on:
   schedule:
