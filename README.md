@@ -4,7 +4,7 @@
 # 📱 如何使用碳账户自动积分脚本
 
 1. **通过iPhone上的App Store下载软件**  
-   - 软件名称为 **Bark**，Bark可以接受服务器验证Token失败的通知，让你可以及时了解Token失效并进行更新。
+   - 软件名称为 **Bark**，Bark可以接受服务器验证Token失败的通知，让你可以及时了解Token失效并进行更新，软件叫做Bark-给你的手机发推送，是一个红色的图标。
 
 2. **下载完成后**  
    - 对软件进行注册，并复制你的 **Bark专属URL**，例如：https://api.day.app/oZaeqGLJzRLSxW7dJqeAC
