@@ -13,7 +13,8 @@
    - Github账户使用Email就可以注册，完全免费，免费账户即可运行本脚本。
   
 4. **复制我的项目到你自己的Github账户下**  
-   - 打开此链接：https://github.com/jjbb013/Carbon-account，并点击右上角的Fork，Fork的意思是将我这个项目完整复制到你的Github账户下，你就可以自己来使用了。
+   - 打开此链接：https://github.com/jjbb013/Carbon-account
+   - 并点击右上角的Fork，Fork的意思是将我这个项目完整复制到你的Github账户下，你就可以自己来使用了。
   
 5. **编辑配置文件**  
    - 打开根目录下的bark.properties文件，点击右上角的🖊进行编辑，将你自己的Bark URL复制到等号（=）的右边，注意不要加最后的斜杠（/）。
