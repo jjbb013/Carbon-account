@@ -8,9 +8,11 @@
 
 2. **下载完成后**  
    - 对软件进行注册，并复制你的 **Bark专属URL**，例如：https://api.day.app/oZaeqGLJzRLSxW7dJqeAC
+   - 这个步骤是在手机上操作的，复制后备用，可以先把这个URL发到电脑上。
 
 3. **注册一个Github账户**  
-   - Github账户使用Email就可以注册，完全免费，免费账户即可运行本脚本。
+   - 这个步骤在电脑上完成
+   - - Github账户使用Email就可以注册，完全免费，免费账户即可运行本脚本。
   
 4. **复制我的项目到你自己的Github账户下**  
    - 打开此链接：https://github.com/jjbb013/Carbon-account
