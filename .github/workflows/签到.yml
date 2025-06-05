@@ -2,7 +2,7 @@ name: 签到
 
 on:
   schedule:
-    - cron: '1 4 * * *' # 上海时区中午12:30，
+    - cron: '1 1 * * *' 
 
   workflow_dispatch:
 
@@ -13,15 +13,27 @@ jobs:
       #Request SignIn
       URL: https://carbon-account-server.carbonstop.net/task/complete
       REQUEST_BODY: '{"value" : 1,"sceneCode" : "MRCJ0002","signMessage" : "2c2b34840b8ec9fb735e1b2bed8533fa"}'
-      BARK_URL: 'https://api.day.app/oZaeqGLJzRLSxW7dJqeACn/'
-
+      
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Read Bark URL from properties
+        id: read_bark_url
+        run: |
+          #!/bin/bash
+          # 读取 bark.properties 文件中的 BARKURL
+          while IFS='=' read -r key value; do
+            if [ "$key" == "BARKURL" ]; then
+              echo "Bark URL is: $value"
+              echo "::set-output name=bark_url::$value"  # 设置输出变量
+            fi
+          done < bark.properties
+
       - name: Request SignIn
         run: |
           #!/bin/bash
+          BARK_URL=${{ steps.read_bark_url.outputs.bark_url }}  # 获取输出的 Bark URL
           # Read the configuration file and process each line
           while IFS='=' read -r name token; do
             echo "Key: $name, Value: $token"
@@ -39,10 +51,10 @@ jobs:
             if grep -q "token校验失败" response.json; then
               echo "$name token校验失败"
               # 发送Bark通知
-              curl -X POST -H 'Content-Type: application/json' -d "{\"title\":\"碳账户Token失效通知\",\"body\":\"$name token校验失败\"}" "$BARK_URL"
+              curl -X POST -H 'Content-Type: application/json' -d "{\"title\":\"碳账户Token失效通知\",\"body\":\"$name token校验失败\",\"group\":\"碳账户通知\"}" "$BARK_URL"
             else
               echo "$name Token 可用"
-              #curl -X POST -H 'Content-Type: application/json' -d "{\"title\":\"碳账户操作成功通知\",\"body\":\"$name token校验成功\"}" "$BARK_URL"
+              #curl -X POST -H 'Content-Type: application/json' -d "{\"title\":\"碳账户操作成功通知\",\"body\":\"$name token校验成功\",\"group\":\"碳账户通知\"}" "$BARK_URL"
             fi
 
           done < config.properties
