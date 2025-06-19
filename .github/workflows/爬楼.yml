@@ -1,120 +1,115 @@
-name: 爬楼
+name: 爬楼任务
 
 on:
   schedule:
-    - cron: '10 4 * * 1-5' # 上海时区中午12:25，对应的UTC时间是前一天晚上20:34 (UTC+8)
+    - cron: '15 4 * * 1-5'  # UTC时间4:15，即北京时间12:15
   workflow_dispatch:
 
 jobs:
-  read-config-file:
+  climbing-task:
     runs-on: ubuntu-latest
     env:
-      URL: https://carbon-account-server.carbonstop.net/task/completeTimeTripTask
-      REQUEST_BODY: '{"sceneCode":"MRCJ0021","value":"24","signMessage":"fcff47b42c5a6782387ea2cf3d4e33d6"}'
+      API_URL: https://carbon-account-server.carbonstop.net/task/completeTimeTripTask
       REQUEST_BODY_1: '{"value":"1","sceneCode":"MRCJ0021","signMessage":"3df1c430e4c80f62f9faa809bf380c06"}'
       REQUEST_BODY_24: '{"sceneCode":"MRCJ0021","value":"24","signMessage":"fcff47b42c5a6782387ea2cf3d4e33d6"}'
-
+    
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Request
+      - name: 检出代码库
+        uses: actions/checkout@v4
+        
+      - name: 安装必要工具
+        run: sudo apt-get -qq install jq
+        
+      - name: 检查配置文件
+        run: |
+          if [ ! -f "user-configs.json" ]; then
+            echo "::error::配置文件 user-configs.json 不存在！"
+            exit 1
+          else
+            echo "✅ 找到配置文件 user-configs.json"
+            echo "📋 用户列表:"
+            jq -r 'keys[]' user-configs.json
+          fi
+        
+      - name: 执行爬楼任务
         run: |
           #!/bin/bash
-          # Read the configuration file and process each line
-          # 扫第一次
-          while IFS='=' read -r name token; do
-            echo "Key: $name, Value: $token"
-            echo "正在执行的账户: $name"
-            curl -X POST \
-            -H "Content-Type: application/json" \
-            -H "Authorization:$token" \
-            -d "$REQUEST_BODY_1" \
-            $URL \
-            -o response.json
+          function execute_climbing_round() {
+            local round=$1
+            
+            # 第一步：提交值为1的请求
+            echo "🏃 第${round}轮爬楼第一步开始 (提交值:1)"
+            while IFS='=' read -r user token; do
+              echo "▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄"
+              echo "🔄 处理用户: $user"
+              
+              # 检查token是否为空
+              if [ -z "$token" ] || [ "$token" = "null" ]; then
+                echo "⚠️ 警告: $user 的appToken为空或未设置"
+                continue
+              fi
+              
+              # 执行爬楼请求 (值:1)
+              echo "🔍 请求详情:"
+              echo "  URL: $API_URL"
+              echo "  Token: $token"
+              echo "  Body: $REQUEST_BODY_1"
+              
+              curl -s -w "\n" -X POST \
+                -H "Content-Type: application/json" \
+                -H "Authorization: $token" \
+                -d "$REQUEST_BODY_1" \
+                $API_URL
+                
+              echo  # 添加空行
+              sleep 1  # 用户间短暂间隔
+            done < <(jq -r 'to_entries[] | "\(.key)=\(.value.appToken)"' user-configs.json)
+            echo "✅ 第${round}轮爬楼第一步完成"
+            
+            # 等待5分钟
+            echo -e "\n🕒 等待5分钟进行第${round}轮第二步...\n"
+            sleep 300
+            
+            # 第二步：提交值为24的请求
+            echo "🏃 第${round}轮爬楼第二步开始 (提交值:24)"
+            while IFS='=' read -r user token; do
+              echo "▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄"
+              echo "🔄 处理用户: $user"
+              
+              # 检查token是否为空
+              if [ -z "$token" ] || [ "$token" = "null" ]; then
+                echo "⚠️ 警告: $user 的appToken为空或未设置"
+                continue
+              fi
+              
+              # 执行爬楼请求 (值:24)
+              echo "🔍 请求详情:"
+              echo "  URL: $API_URL"
+              echo "  Token: $token"
+              echo "  Body: $REQUEST_BODY_24"
+              
+              curl -s -w "\n" -X POST \
+                -H "Content-Type: application/json" \
+                -H "Authorization: $token" \
+                -d "$REQUEST_BODY_24" \
+                $API_URL
+                
+              echo  # 添加空行
+              sleep 1  # 用户间短暂间隔
+            done < <(jq -r 'to_entries[] | "\(.key)=\(.value.appToken)"' user-configs.json)
+            echo "✅ 第${round}轮爬楼第二步完成"
+          }
           
-            echo "Response:"
-            cat response.json  
-          done < config.properties
-          #等5分钟
-          sleep 300
-          while IFS='=' read -r name token; do
-            echo "Key: $name, Value: $token"
-            echo "正在执行的账户: $name"
-            curl -X POST \
-            -H "Content-Type: application/json" \
-            -H "Authorization:$token" \
-            -d "$REQUEST_BODY_24" \
-            $URL \
-            -o response.json
+          # 执行3轮爬楼任务
+          for i in {1..3}; do
+            echo "🚀 开始执行第${i}轮爬楼任务"
+            execute_climbing_round $i
+            
+            # 如果不是最后一轮，等待20秒进入下一轮
+            if [ $i -lt 3 ]; then
+              echo -e "\n🕒 等待20秒进入下一轮爬楼...\n"
+              sleep 20
+            fi
+          done
           
-            echo "Response:"
-            cat response.json  
-          done < config.properties
-          #等20秒
-          sleep 20
-          # 扫第二次
-          while IFS='=' read -r name token; do
-            echo "Key: $name, Value: $token"
-            echo "正在执行的账户: $name"
-            curl -X POST \
-            -H "Content-Type: application/json" \
-            -H "Authorization:$token" \
-            -d "$REQUEST_BODY_1" \
-            $URL \
-            -o response.json
-          
-            echo "Response:"
-            cat response.json  
-          done < config.properties
-          #等5分钟
-          sleep 300
-          while IFS='=' read -r name token; do
-            echo "Key: $name, Value: $token"
-            echo "正在执行的账户: $name"
-            curl -X POST \
-            -H "Content-Type: application/json" \
-            -H "Authorization:$token" \
-            -d "$REQUEST_BODY_24" \
-            $URL \
-            -o response.json
-          
-            echo "Response:"
-            cat response.json  
-          done < config.properties
-          #等20秒
-          sleep 20
-          # 扫第三次
-          while IFS='=' read -r name token; do
-            echo "Key: $name, Value: $token"
-            echo "正在执行的账户: $name"
-            curl -X POST \
-            -H "Content-Type: application/json" \
-            -H "Authorization:$token" \
-            -d "$REQUEST_BODY_1" \
-            $URL \
-            -o response.json
-          
-            echo "Response:"
-            cat response.json  
-          done < config.properties
-          #等5分钟
-          sleep 300
-          while IFS='=' read -r name token; do
-            echo "Key: $name, Value: $token"
-            echo "正在执行的账户: $name"
-            curl -X POST \
-            -H "Content-Type: application/json" \
-            -H "Authorization:$token" \
-            -d "$REQUEST_BODY_24" \
-            $URL \
-            -o response.json
-          
-            echo "Response:"
-            cat response.json  
-          done < config.properties
-
-      - name: Log response status
-        run: |
-          RESPONSE_STATUS=$(jq -r '.status' response.json)
-          echo -e "Response Status: $RESPONSE_STATUS \n"
+          echo "🏁 所有爬楼任务已完成"
