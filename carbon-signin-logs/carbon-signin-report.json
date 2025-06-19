@@ -1,29 +1,20 @@
 [
   {
-    "user": "apple",
-    "timestamp": "2025-06-20T00:54:53+0800",
+    "user": "LongAoTian",
+    "timestamp": "2025-06-20T01:03:29+0800",
     "httpStatus": 200,
     "apiCode": "600",
     "apiMsg": "token校验失败",
     "tokenInvalid": true,
-    "rawFile": "carbon-signin-logs/raw-responses/apple_20250620_005448_response.json"
+    "rawFile": "carbon-signin-logs/raw-responses/LongAoTian_20250620_010325_response.json"
   },
   {
-    "user": "peter",
-    "timestamp": "2025-06-20T00:54:55+0800",
+    "user": "Will",
+    "timestamp": "2025-06-20T01:03:32+0800",
     "httpStatus": 200,
-    "apiCode": "600",
-    "apiMsg": "token校验失败",
-    "tokenInvalid": true,
-    "rawFile": "carbon-signin-logs/raw-responses/peter_20250620_005454_response.json"
-  },
-  {
-    "user": "will",
-    "timestamp": "2025-06-20T00:55:04+0800",
-    "httpStatus": 200,
-    "apiCode": "200",
-    "apiMsg": "OK",
+    "apiCode": "500",
+    "apiMsg": "本日已完成",
     "tokenInvalid": false,
-    "rawFile": "carbon-signin-logs/raw-responses/will_20250620_005456_response.json"
+    "rawFile": "carbon-signin-logs/raw-responses/Will_20250620_010330_response.json"
   }
 ]
