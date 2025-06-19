@@ -1,106 +1,308 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>碳账户配置提交 1.2</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; connect-src https://api.github.com;">
+    <title>碳账户配置提交 2.0</title>
     <style>
-        body { font-family: Arial; max-width: 600px; margin: 0 auto; padding: 20px; }
-        form { display: flex; flex-direction: column; gap: 12px; }
-        input, button { padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
-        button { background: #238636; color: white; cursor: pointer; }
-        .success { color: green; }
-        .error { color: red; }
-        .warning { color: orange; }
+        :root {
+            --primary-color: #238636;
+            --error-color: #d73a49;
+            --warning-color: #e36209;
+        }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; 
+            max-width: 600px; 
+            margin: 0 auto; 
+            padding: 20px;
+            line-height: 1.6;
+        }
+        form { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 16px; 
+            margin-top: 24px;
+        }
+        label { 
+            font-weight: 600;
+            display: block;
+            margin-bottom: 4px;
+        }
+        input, button { 
+            padding: 10px 12px; 
+            border: 1px solid #d1d5da; 
+            border-radius: 6px; 
+            width: 100%;
+            box-sizing: border-box;
+        }
+        button { 
+            background: var(--primary-color); 
+            color: white; 
+            cursor: pointer; 
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background: #2ea043;
+        }
+        .message { 
+            margin-top: 16px;
+            padding: 12px;
+            border-radius: 6px;
+            border-left: 4px solid;
+        }
+        .success { 
+            color: #1a7f37;
+            background-color: #f6ffed;
+            border-color: var(--primary-color);
+        }
+        .error { 
+            color: var(--error-color);
+            background-color: #fff1f0;
+            border-color: var(--error-color);
+        }
+        .warning { 
+            color: var(--warning-color);
+            background-color: #fff8e6;
+            border-color: var(--warning-color);
+        }
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
-    <h1>提交碳账户配置</h1>
+    <header>
+        <h1>碳账户配置提交</h1>
+        <p>通过此页面将您的配置安全存储到GitHub仓库</p>
+    </header>
+
     <form id="configForm">
-        <label for="username">用户名（唯一标识）:</label>
-        <input type="text" id="username" required>
+        <div>
+            <label for="username">用户名（唯一标识）:</label>
+            <input type="text" id="username" required minlength="3" maxlength="30" pattern="[a-zA-Z0-9_-]+" 
+                   title="只允许字母、数字、下划线和连字符">
+        </div>
         
-        <label for="appToken">App Token:</label>
-        <input type="text" id="appToken" required>
+        <div>
+            <label for="appToken">App Token:</label>
+            <input type="password" id="appToken" required minlength="10"
+                   placeholder="建议使用GitHub Fine-grained token[8](@ref)">
+        </div>
         
-        <label for="barkUrl">Bark通知URL（可选）:</label>
-        <input type="url" id="barkUrl" placeholder="https://api.day.app/xxx">
+        <div>
+            <label for="barkUrl">Bark通知URL（可选）:</label>
+            <input type="url" id="barkUrl" placeholder="https://api.day.app/xxx">
+        </div>
         
-        <button type="submit">提交配置</button>
+        <button type="submit" id="submitBtn">
+            <span id="submitText">提交配置</span>
+        </button>
     </form>
+
     <div id="message"></div>
+    <div id="debugLog" style="display: none; margin-top: 20px; font-family: monospace;"></div>
 
     <script>
+        // 开发模式调试开关
+        const DEV_MODE = window.location.hostname === 'localhost';
+        if (DEV_MODE) {
+            document.getElementById('debugLog').style.display = 'block';
+            console.log('开发模式已启用，调试日志可见');
+        }
+
+        /**
+         * 安全日志记录函数（生产环境自动过滤敏感信息）
+         */
+        function log(message, level = 'info', data = {}) {
+            const timestamp = new Date().toISOString();
+            const logEntry = { timestamp, level, message };
+            
+            // 过滤敏感字段
+            const safeData = {...data};
+            ['appToken', 'githubToken'].forEach(field => {
+                if (safeData[field]) safeData[field] = '***REDACTED***';
+            });
+            
+            if (Object.keys(safeData).length) logEntry.data = safeData;
+            
+            // 开发环境显示在页面
+            if (DEV_MODE) {
+                document.getElementById('debugLog').innerHTML += 
+                    `<pre>${JSON.stringify(logEntry, null, 2)}</pre>`;
+            }
+            
+            console[level](logEntry);
+        }
+
+        /**
+         * 封装GitHub API请求
+         */
+        async function callGitHubAPI({ endpoint, method = 'GET', body = null }) {
+            const url = `https://api.github.com${endpoint}`;
+            const headers = {
+                'Accept': 'application/vnd.github.v3+json',
+                'Authorization': `token ${getGitHubToken()}`,
+                'X-GitHub-Api-Version': '2022-11-28'
+            };
+
+            log(`API请求: ${method} ${endpoint}`, 'debug', { method, endpoint });
+
+            try {
+                const response = await fetch(url, {
+                    method,
+                    headers,
+                    body: body ? JSON.stringify(body) : null
+                });
+
+                const responseData = await response.json();
+                
+                if (!response.ok) {
+                    // 处理速率限制
+                    if (response.status === 403 && response.headers.get('X-RateLimit-Remaining') === '0') {
+                        const resetTime = new Date(response.headers.get('X-RateLimit-Reset') * 1000);
+                        throw new Error(`API速率限制已耗尽，将在 ${resetTime.toLocaleTimeString()} 重置`);
+                    }
+                    throw new Error(`API错误: ${responseData.message || '未知错误'}`);
+                }
+
+                return responseData;
+            } catch (error) {
+                log(`API请求失败: ${error.message}`, 'error', { url, status: error.status });
+                throw error;
+            }
+        }
+
+        /**
+         * 获取GitHub Token（优先从环境变量获取）
+         */
+        function getGitHubToken() {
+            // 实际部署时应通过GitHub Actions的secrets注入[7](@ref)
+            return window.__GITHUB_TOKEN__ || "{{ secrets.GH_TOKEN }}";
+        }
+
+        /**
+         * 显示状态消息
+         */
+        function showMessage(text, type = 'info', duration = 5000) {
+            const messageEl = document.getElementById('message');
+            messageEl.innerHTML = `<div class="${type}">${text}</div>`;
+            
+            if (type === 'success' && duration > 0) {
+                setTimeout(() => messageEl.innerHTML = '', duration);
+            }
+        }
+
+        /**
+         * 加载现有配置文件
+         */
+        async function loadConfig() {
+            const endpoint = `/repos/jjbb013/Carbon-account/contents/user-configs.json`;
+            let config = {};
+            let sha = null;
+
+            try {
+                const data = await callGitHubAPI({ endpoint });
+                config = JSON.parse(atob(data.content.replace(/\s/g, '')));
+                sha = data.sha;
+                log('成功加载配置文件', 'info', { sha: sha?.slice(0, 8) });
+            } catch (error) {
+                if (!error.message.includes('404')) throw error;
+                log('配置文件不存在，将创建新文件', 'info');
+            }
+
+            return { config, sha };
+        }
+
+        /**
+         * 保存配置到GitHub
+         */
+        async function saveConfig(config, sha, username) {
+            const endpoint = `/repos/jjbb013/Carbon-account/contents/user-configs.json`;
+            
+            await callGitHubAPI({
+                method: 'PUT',
+                endpoint,
+                body: {
+                    message: `Update config for ${username}`,
+                    content: btoa(JSON.stringify(config, null, 2)),
+                    sha
+                }
+            });
+        }
+
+        // 表单提交处理
         document.getElementById('configForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            const submitBtn = document.getElementById('submitBtn');
+            const submitText = document.getElementById('submitText');
+            
+            // 禁用按钮防止重复提交
+            submitBtn.disabled = true;
+            submitText.innerHTML = `<span class="loading"></span>处理中...`;
+
             const username = document.getElementById('username').value.trim();
             const appToken = document.getElementById('appToken').value.trim();
             const barkUrl = document.getElementById('barkUrl').value.trim();
 
-            // 从GitHub Secrets注入的Token（需在Actions中设置GH_TOKEN）
-            const githubToken = "{{ secrets.GH_TOKEN }}"; // 实际部署时需替换为动态注入逻辑
-            
-            try {
-                const repoOwner = "jjbb013";
-                const repoName = "Carbon-account";
-                const filePath = "user-configs.json";
-                const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`;
+            log('开始处理表单提交', 'info', { username, barkUrl });
 
-                // 1. 读取现有配置
-                let config = {};
-                let sha = null;
-                try {
-                    const response = await fetch(apiUrl, {
-                        headers: { 
-                            'Accept': 'application/vnd.github.v3+json',
-                            'Authorization': `token ${githubToken}`
-                        }
-                    });
-                    if (response.ok) {
-                        const data = await response.json();
-                        config = JSON.parse(atob(data.content.replace(/\s/g, '')));
-                        sha = data.sha;
-                    } else if (response.status !== 404) {
-                        throw new Error(`读取配置失败: ${response.status}`);
-                    }
-                } catch (error) {
-                    console.error("初始化配置时出错:", error);
+            try {
+                // 输入验证
+                if (!username || !appToken) {
+                    throw new Error('用户名和App Token为必填项');
                 }
+
+                // 1. 加载现有配置
+                const { config, sha } = await loadConfig();
 
                 // 2. 更新配置
                 config[username] = { 
-                    appToken: appToken,
+                    appToken, // 实际项目中应考虑加密存储[9,11](@ref)
                     barkUrl: barkUrl || null,
                     updatedAt: new Date().toISOString()
                 };
 
-                // 3. 提交到GitHub
-                const updateResponse = await fetch(apiUrl, {
-                    method: 'PUT',
-                    headers: {
-                        'Accept': 'application/vnd.github.v3+json',
-                        'Authorization': `token ${githubToken}`
-                    },
-                    body: JSON.stringify({
-                        message: `Update config for ${username}`,
-                        content: btoa(JSON.stringify(config, null, 2)),
-                        sha: sha // 新文件时为null
-                    })
-                });
+                // 3. 保存到GitHub
+                await saveConfig(config, sha, username);
+                
+                showMessage(`配置保存成功！用户名: ${username}`, 'success');
+                log('配置保存完成', 'info', { username });
 
-                if (!updateResponse.ok) {
-                    const errorData = await updateResponse.json();
-                    throw new Error(`API返回错误: ${JSON.stringify(errorData)}`);
-                }
-
-                document.getElementById('message').innerHTML = 
-                    `<p class="success">配置保存成功！用户名: ${username}</p>`;
+                // 清空敏感字段
+                document.getElementById('appToken').value = '';
             } catch (error) {
-                document.getElementById('message').innerHTML = `
-                    <p class="error">保存失败: ${error.message}</p>
-                    <p class="warning">请检查Token权限或网络连接</p>
-                `;
+                showMessage(`保存失败: ${error.message}`, 'error', 0);
+                log('配置保存失败', 'error', { error: error.message });
+                
+                // 特殊错误处理
+                if (error.message.includes('Bad credentials')) {
+                    showMessage('Token无效或权限不足，请检查GitHub Token设置[6,8](@ref)', 'warning', 0);
+                }
+            } finally {
+                submitBtn.disabled = false;
+                submitText.textContent = '提交配置';
             }
         });
+
+        // 开发模式预填充测试数据
+        if (DEV_MODE) {
+            document.getElementById('username').value = 'test_user_' + Math.floor(Math.random() * 1000);
+            document.getElementById('appToken').value = 'ghp_testtoken1234567890';
+            log('开发模式：已填充测试数据', 'debug');
+        }
     </script>
 </body>
 </html>
