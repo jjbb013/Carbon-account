@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="通过此页面安全提交碳账户配置到GitHub仓库">
-    <title>碳账户配置管理 - GitHub方案</title>
+    <title>碳账户配置提交 - GitHub方案</title>
     <style>
         :root {
             --primary: #238636;
@@ -12,53 +12,27 @@
             --warning: #e36209;
             --success: #2c974b;
             --gray: #f6f8fa;
-            --dark: #24292f;
-        }
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
             line-height: 1.6;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
             color: #333;
             background-color: var(--gray);
-            padding: 20px;
         }
         .container {
-            max-width: 800px;
-            margin: 0 auto;
             background-color: white;
+            padding: 25px;
             border-radius: 10px;
-            box-shadow: 0 3px 15px rgba(0,0,0,0.1);
-            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
         }
-        header {
-            background-color: var(--dark);
-            color: white;
-            padding: 25px;
+        h1 {
+            color: var(--primary);
             text-align: center;
-        }
-        header h1 {
-            font-size: 1.8rem;
-            margin-bottom: 5px;
-            color: white;
-        }
-        .section {
-            padding: 25px;
-            border-bottom: 1px solid #e1e4e8;
-        }
-        .token-display {
-            background-color: #fff9db;
-            padding: 15px;
-            border-radius: 6px;
-            font-family: monospace;
-            font-size: 1rem;
-            word-break: break-all;
             margin-bottom: 20px;
-            border: 1px solid #ffd43b;
-            text-align: center;
+            font-size: 1.8rem;
         }
         .warning-box {
             background-color: #fff8e6;
@@ -70,35 +44,26 @@
         .warning-box p {
             margin: 5px 0;
         }
-        .form-title {
-            color: var(--dark);
-            margin-bottom: 20px;
-            font-size: 1.4rem;
-        }
         form {
-            display: grid;
-            grid-template-columns: 1fr;
+            display: flex;
+            flex-direction: column;
             gap: 20px;
         }
-        @media (min-width: 600px) {
-            form {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
         label {
-            display: block;
             font-weight: 600;
+            display: block;
             margin-bottom: 8px;
-            color: var(--dark);
+            color: #444;
         }
         input {
             padding: 12px;
             border: 1px solid #d1d5da;
             border-radius: 6px;
             width: 100%;
+            box-sizing: border-box;
             font-size: 16px;
         }
         input:focus {
@@ -116,21 +81,10 @@
             transition: background-color 0.2s, transform 0.1s;
             border: none;
             border-radius: 6px;
-            width: 100%;
+            margin-top: 10px;
         }
         button:hover {
             background: #2ea043;
-        }
-        button.delete {
-            background: transparent;
-            color: var(--error);
-            border: 1px solid var(--error);
-            padding: 5px 12px;
-            font-size: 14px;
-            font-weight: normal;
-        }
-        button.delete:hover {
-            background: #fff1f0;
         }
         button:active {
             transform: translateY(1px);
@@ -143,17 +97,16 @@
             margin-top: 20px;
             padding: 15px;
             border-radius: 6px;
-            display: none;
         }
         .success {
+            color: var(--success);
             background-color: #f0fff4;
             border: 1px solid rgba(44, 151, 75, 0.3);
-            color: var(--success);
         }
         .error {
+            color: var(--error);
             background-color: #fff1f0;
             border: 1px solid rgba(215, 58, 73, 0.3);
-            color: var(--error);
         }
         .loading {
             display: inline-block;
@@ -169,367 +122,278 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
-        .user-list {
-            margin-top: 25px;
-        }
-        .user-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            border-bottom: 1px solid #eaecef;
-        }
-        .user-item:last-child {
-            border-bottom: none;
-        }
-        .user-info {
-            flex: 1;
-        }
-        .user-actions {
-            margin-left: 15px;
-        }
-        .user-item:hover {
-            background-color: #f6f8fa;
-        }
         .instructions {
             font-size: 0.9rem;
             color: #666;
             margin-top: 8px;
         }
-        .no-users {
+        .footer {
             text-align: center;
-            color: #666;
-            padding: 30px;
-            font-style: italic;
-        }
-        .data-display {
-            background-color: #f8f9fa;
-            padding: 15px;
-            border-radius: 6px;
-            font-family: monospace;
-            white-space: pre-wrap;
-            font-size: 0.9rem;
-            margin-top: 10px;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-        footer {
-            text-align: center;
-            padding: 20px;
+            margin-top: 30px;
             color: #666;
             font-size: 0.85rem;
         }
         .bark-guide {
-            background-color: #f0f7ff;
-            padding: 20px;
-            border-radius: 8px;
             margin-top: 30px;
-            border-left: 4px solid #1a73e8;
+            padding: 15px;
+            background: #f9f9f9;
+            border-left: 4px solid var(--primary);
+            border-radius: 0 4px 4px 0;
         }
         .bark-guide h3 {
-            color: #1a73e8;
-            margin-bottom: 15px;
+            margin-top: 0;
+            color: var(--primary);
+            font-size: 1.1rem;
         }
-        .bark-guide ol {
-            padding-left: 20px;
-            margin-bottom: 15px;
-        }
-        .bark-guide li {
-            margin-bottom: 10px;
+        .bark-guide p {
+            margin: 8px 0;
         }
         .bark-guide img {
-            max-width: 100%;
-            border-radius: 8px;
-            margin-top: 15px;
-            border: 1px solid #ddd;
+            width: 18px;
+            height: 18px;
+            vertical-align: middle;
+            margin-right: 5px;
         }
-        .user-select-container {
-            position: relative;
+        .history-section {
+            margin: 15px 0;
         }
-        .user-select {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #d1d5da;
+        .history-item {
+            padding: 8px 10px;
+            border: 1px solid #e1e4e8;
             border-radius: 6px;
-            font-size: 16px;
-            background-color: white;
+            background: #f6f8fa;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-        .user-select:focus {
-            border-color: var(--primary);
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(35, 134, 54, 0.1);
+        .history-item .url {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 75%;
+        }
+        .history-item .actions {
+            display: flex;
+            gap: 8px;
+        }
+        .history-item button {
+            padding: 5px 8px;
+            font-size: 0.8rem;
+            margin-top: 0;
+        }
+        .history-item .copy-btn {
+            background: #0969da;
+        }
+        .history-item .use-btn {
+            background: var(--success);
+        }
+        .history-item .remove-btn {
+            background: var(--error);
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>碳账户配置管理</h1>
-            <p>基于GitHub API的配置管理界面</p>
-        </header>
+        <h1>碳账户配置提交</h1>
         
-        <div class="section">
-            <h2 class="form-title">Github Token</h2>
-            <div class="token-display">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</div>
-            <p class="instructions">此Token用于访问GitHub API管理配置信息，请妥善保管。</p>
+        <div class="warning-box">
+            <p><strong>重要提示：</strong>您需要创建GitHub Token以提交配置</p>
+            <p>1. 访问 <a href="https://github.com/settings/tokens" target="_blank">GitHub Tokens</a></p>
+            <p>2. 创建具有<strong>repo</strong>权限的Token</p>
+            <p>3. 复制Token并粘贴到下方</p>
         </div>
         
-        <div class="section">
-            <h2 class="form-title">管理配置</h2>
-            
-            <div class="warning-box">
-                <p><strong>注意：</strong>用户名必须是唯一标识符（只允许字母、数字和下划线）</p>
+        <form id="configForm">
+            <div class="form-group">
+                <label for="ghToken">您的GitHub Token (必需)</label>
+                <input type="text" id="ghToken" required placeholder="ghp_xxxxxxxx" autocomplete="off">
+                <p class="instructions">Token需要repo权限才能更新配置</p>
             </div>
             
-            <form id="configForm">
-                <div class="form-group">
-                    <label for="username">选择或输入用户名</label>
-                    <div class="user-select-container">
-                        <select id="userSelect" class="user-select">
-                            <option value="">-- 选择现有用户或输入新用户 --</option>
-                            <!-- 用户选项将动态加载 -->
-                        </select>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="username">用户名（唯一标识）</label>
-                    <input type="text" id="username" required placeholder="example_user">
-                </div>
-                
-                <div class="form-group">
-                    <label for="appToken">应用Token</label>
-                    <input type="text" id="appToken" required placeholder="用于API请求的凭证">
-                </div>
-                
-                <div class="form-group">
-                    <label for="barkUrl">Bark通知URL</label>
-                    <input type="url" id="barkUrl" placeholder="https://api.day.app/xxxxxx">
-                </div>
-                
-                <div class="form-group">
-                    <button type="submit" id="submitBtn">
-                        <span id="submitText">提交配置</span>
-                    </button>
-                </div>
-            </form>
-            
-            <div id="formMessage" class="message"></div>
-        </div>
-        
-        <div class="section">
-            <h2 class="form-title">现有配置</h2>
-            
-            <div class="user-list" id="userList">
-                <div class="no-users" id="noUsersMessage">正在加载配置数据...</div>
-                <!-- 用户列表会动态加载在这里 -->
+            <div class="form-group">
+                <label for="username">用户名（唯一标识）</label>
+                <input type="text" id="username" required placeholder="my_app_user">
             </div>
             
-            <div id="userMessage" class="message"></div>
-        </div>
-        
-        <div class="section">
-            <div class="bark-guide">
-                <h3>如何使用Bark接收通知</h3>
-                <ol>
-                    <li>在iPhone或iPad上安装Bark应用（App Store搜索"Bark"）</li>
-                    <li>打开应用后，点击底部的"注册设备"按钮</li>
-                    <li>复制显示的URL地址（格式为https://api.day.app/xxxxxx）</li>
-                    <li>将复制的URL粘贴到上面的Bark通知URL字段</li>
-                    <li>提交后，系统将通过此URL向您发送通知</li>
-                </ol>
-                <p><strong>提示：</strong>每个设备有唯一的URL，请妥善保管</p>
+            <div class="form-group">
+                <label for="appToken">应用Token</label>
+                <input type="password" id="appToken" required placeholder="用于定时任务的凭证">
             </div>
+            
+            <div class="form-group">
+                <label for="barkUrl">Bark通知URL（可选）</label>
+                <input type="url" id="barkUrl" placeholder="https://api.day.app/xxxxxx">
+                <p class="instructions">用于接收通知的设备URL</p>
+                
+                <div class="history-section" id="urlHistorySection" style="display:none;">
+                    <h4>历史记录</h4>
+                    <div id="urlHistoryList"></div>
+                </div>
+            </div>
+            
+            <button type="submit" id="submitBtn">
+                <span id="submitText">提交配置</span>
+            </button>
+        </form>
+        
+        <div id="message"></div>
+        
+        <div class="bark-guide">
+            <h3>如何设置Bark通知</h3>
+            <p><strong>步骤一：</strong> 下载Bark应用</p>
+            <p>Bark目前仅支持iOS设备，请访问<a href="https://apps.apple.com/cn/app/bark-%E7%A7%81%E4%BA%BA%E9%80%9A%E7%9F%A5%E5%B7%A5%E5%85%B7/id1403753865" target="_blank">App Store</a>下载安装</p>
+            
+            <p><strong>步骤二：</strong> 获取Bark URL</p>
+            <p>1. 打开Bark应用</p>
+            <p>2. 点击底部菜单栏的【我的】</p>
+            <p>3. 在【我的】页面中，点击【复制推送链接】按钮</p>
+            <p>4. URL格式类似：https://api.day.app/xxxxxxxxxxx</p>
+            
+            <p><strong>步骤三：</strong> 粘贴URL到表单</p>
+            <p>将复制的链接粘贴到上面的"Bark通知URL"输入框</p>
         </div>
         
-        <footer>
-            <p>GitHub碳账户配置管理 | 基于GitHub API实现 | 数据存储在 <a href="https://github.com/jjbb013/Carbon-account">Carbon-account</a> 仓库</p>
-        </footer>
+        <div class="footer">
+            <p>此工具免费运行于GitHub平台 | 配置存储于仓库 <a href="https://github.com/jjbb013/Carbon-account">Carbon-account</a></p>
+        </div>
     </div>
 
     <script>
-        // 配置GitHub存储信息
-        const REPO_OWNER = "jjbb013";
-        const REPO_NAME = "Carbon-account";
-        const CONFIG_FILE = "user-configs.json";
-        const GITHUB_TOKEN = "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";
+        // 存储历史记录的键
+        const BARK_HISTORY_KEY = "barkUrlHistory";
         
-        // 全局变量存储配置数据
-        let existingConfig = {};
-        
-        // DOM元素
-        const formMessage = document.getElementById('formMessage');
-        const userMessage = document.getElementById('userMessage');
-        const userList = document.getElementById('userList');
-        const noUsersMessage = document.getElementById('noUsersMessage');
-        const userSelect = document.getElementById('userSelect');
-        const usernameInput = document.getElementById('username');
-        const appTokenInput = document.getElementById('appToken');
-        const barkUrlInput = document.getElementById('barkUrl');
-        
-        // 页面加载时获取配置
-        document.addEventListener('DOMContentLoaded', () => {
-            loadConfig();
-        });
-        
-        // 用户选择事件处理
-        userSelect.addEventListener('change', function() {
-            const selectedUser = this.value;
-            if (selectedUser && existingConfig[selectedUser]) {
-                // 填充表单
-                usernameInput.value = selectedUser;
-                appTokenInput.value = existingConfig[selectedUser].appToken;
-                barkUrlInput.value = existingConfig[selectedUser].barkUrl || '';
-            } else {
-                // 清空表单
-                usernameInput.value = '';
-                appTokenInput.value = '';
-                barkUrlInput.value = '';
-            }
-        });
-        
-        // 显示消息函数
-        function showMessage(element, text, type = 'info', duration = 5000) {
-            element.textContent = text;
-            element.className = `message ${type}`;
-            element.style.display = 'block';
+        // 显示消息的函数
+        function showMessage(text, type = 'info', duration = 5000) {
+            const messageEl = document.getElementById('message');
+            messageEl.innerHTML = `<div class="message ${type}">${text}</div>`;
             
             if (type === 'success' && duration > 0) {
-                setTimeout(() => {
-                    element.style.display = 'none';
-                }, duration);
+                setTimeout(() => messageEl.innerHTML = '', duration);
             }
         }
         
-        // 加载配置并显示用户列表
-        async function loadConfig() {
-            noUsersMessage.textContent = "正在加载用户配置...";
-            userList.innerHTML = '';
-            userSelect.innerHTML = '<option value="">-- 选择现有用户或输入新用户 --</option>';
-            
-            try {
-                const configUrl = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${CONFIG_FILE}`;
-                
-                const response = await fetch(configUrl, {
-                    headers: { 
-                        'Accept': 'application/vnd.github.v3+json',
-                        'Authorization': `token ${GITHUB_TOKEN}`
-                    }
-                });
-                
-                if (!response.ok) {
-                    if (response.status === 404) {
-                        noUsersMessage.textContent = "尚未存储任何用户配置";
-                        return;
-                    }
-                    throw new Error(`加载配置失败: ${response.status} ${response.statusText}`);
-                }
-                
-                const data = await response.json();
-                existingConfig = JSON.parse(atob(data.content.replace(/\s/g, '')));
-                
-                if (Object.keys(existingConfig).length === 0) {
-                    noUsersMessage.textContent = "尚未存储任何用户配置";
-                    return;
-                }
-                
-                // 填充用户选择下拉框
-                for (const username in existingConfig) {
-                    const option = document.createElement('option');
-                    option.value = username;
-                    option.textContent = username;
-                    userSelect.appendChild(option);
-                }
-                
-                // 填充用户列表
-                userList.innerHTML = '';
-                noUsersMessage.style.display = 'none';
-                
-                for (const username in existingConfig) {
-                    const user = existingConfig[username];
-                    const userItem = document.createElement('div');
-                    userItem.className = 'user-item';
-                    userItem.innerHTML = `
-                        <div class="user-info">
-                            <div><strong>用户名:</strong> ${username}</div>
-                            <div><strong>Bark URL:</strong> ${user.barkUrl || '未设置'}</div>
-                            <div class="instructions">创建于: ${new Date(user.updatedAt).toLocaleString()}</div>
-                        </div>
-                        <div class="user-actions">
-                            <button class="delete" data-username="${username}">删除</button>
-                        </div>
-                    `;
-                    userList.appendChild(userItem);
-                }
-                
-                // 添加删除按钮事件
-                document.querySelectorAll('.user-actions button').forEach(button => {
-                    button.addEventListener('click', () => {
-                        const username = button.getAttribute('data-username');
-                        deleteUser(username);
-                    });
-                });
-                
-            } catch (error) {
-                noUsersMessage.textContent = "加载配置失败: " + error.message;
-                console.error('配置加载错误:', error);
-            }
+        // 获取历史记录
+        function getBarkHistory() {
+            const historyStr = localStorage.getItem(BARK_HISTORY_KEY);
+            return historyStr ? JSON.parse(historyStr) : [];
         }
         
-        // 删除用户
-        async function deleteUser(username) {
-            if (!confirm(`确定要删除用户 "${username}" 的配置吗？`)) return;
+        // 保存历史记录
+        function saveBarkHistory(history) {
+            localStorage.setItem(BARK_HISTORY_KEY, JSON.stringify(history));
+        }
+        
+        // 添加URL到历史记录
+        function addToBarkHistory(url) {
+            if (!url) return;
+            
+            let history = getBarkHistory();
+            
+            // 移除重复项
+            history = history.filter(item => item.url !== url);
+            
+            // 添加新项目到最前面
+            history.unshift({
+                url: url,
+                timestamp: new Date().toISOString()
+            });
+            
+            // 最多保存5个记录
+            if (history.length > 5) {
+                history = history.slice(0, 5);
+            }
+            
+            saveBarkHistory(history);
+            renderBarkHistory();
+        }
+        
+        // 移除历史记录项
+        function removeFromBarkHistory(url) {
+            let history = getBarkHistory();
+            history = history.filter(item => item.url !== url);
+            saveBarkHistory(history);
+            renderBarkHistory();
+        }
+        
+        // 渲染历史记录
+        function renderBarkHistory() {
+            const history = getBarkHistory();
+            const container = document.getElementById('urlHistoryList');
+            const section = document.getElementById('urlHistorySection');
+            
+            if (history.length === 0) {
+                section.style.display = 'none';
+                return;
+            }
+            
+            section.style.display = 'block';
+            container.innerHTML = '';
+            
+            history.forEach(item => {
+                const itemEl = document.createElement('div');
+                itemEl.className = 'history-item';
+                
+                itemEl.innerHTML = `
+                    <span class="url" title="${item.url}">${item.url}</span>
+                    <div class="actions">
+                        <button class="copy-btn" onclick="copyToClipboard('${item.url}')">复制</button>
+                        <button class="use-btn" onclick="setBarkUrl('${item.url}')">使用</button>
+                        <button class="remove-btn" onclick="removeFromBarkHistory('${item.url}')">移除</button>
+                    </div>
+                `;
+                
+                container.appendChild(itemEl);
+            });
+        }
+        
+        // 复制到剪贴板
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showMessage('URL已复制到剪贴板', 'success');
+            }).catch(err => {
+                showMessage('复制失败: ' + err, 'error');
+            });
+        }
+        
+        // 设置Bark URL
+        function setBarkUrl(url) {
+            document.getElementById('barkUrl').value = url;
+            showMessage('URL已填入输入框', 'success', 2000);
+        }
+        
+        // 初始化页面时渲染历史记录
+        window.addEventListener('DOMContentLoaded', () => {
+            renderBarkHistory();
+            
+            // 尝试加载用户的Bark配置
+            document.getElementById('username').addEventListener('blur', loadBarkConfig);
+        });
+        
+        // 尝试加载用户的Bark配置
+        async function loadBarkConfig() {
+            const username = document.getElementById('username').value.trim();
+            if (!username) return;
+            
+            const repoOwner = "jjbb013";
+            const repoName = "Carbon-account";
+            const configFile = "user-configs.json";
+            const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${configFile}`;
             
             try {
-                // 获取当前配置
-                const configUrl = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${CONFIG_FILE}`;
-                const response = await fetch(configUrl, {
-                    headers: { 
-                        'Accept': 'application/vnd.github.v3+json',
-                        'Authorization': `token ${GITHUB_TOKEN}`
-                    }
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`加载配置失败: ${response.status}`);
-                }
+                const response = await fetch(apiUrl);
+                if (!response.ok) return;
                 
                 const data = await response.json();
-                const config = JSON.parse(atob(data.content.replace(/\s/g, '')));
+                const content = atob(data.content.replace(/\s/g, ''));
+                const config = JSON.parse(content);
                 
-                // 删除指定用户
-                if (!config[username]) {
-                    throw new Error(`未找到用户: ${username}`);
+                if (config[username] && config[username].barkUrl) {
+                    document.getElementById('barkUrl').value = config[username].barkUrl;
+                    addToBarkHistory(config[username].barkUrl);
                 }
-                
-                delete config[username];
-                
-                // 更新配置文件
-                const updateResponse = await fetch(configUrl, {
-                    method: 'PUT',
-                    headers: {
-                        'Accept': 'application/vnd.github.v3+json',
-                        'Authorization': `token ${GITHUB_TOKEN}`
-                    },
-                    body: JSON.stringify({
-                        message: `删除用户: ${username}`,
-                        content: btoa(JSON.stringify(config, null, 2)),
-                        sha: data.sha
-                    })
-                });
-                
-                if (!updateResponse.ok) {
-                    const errorData = await updateResponse.json();
-                    throw new Error(`保存失败: ${errorData.message || '未知错误'}`);
-                }
-                
-                // 刷新用户列表
-                loadConfig();
-                showMessage(userMessage, `成功删除用户: ${username}`, 'success');
-                
             } catch (error) {
-                showMessage(userMessage, `删除失败: ${error.message}`, 'error');
-                console.error('删除用户错误:', error);
+                console.log('获取配置失败，可能是新用户', error);
             }
         }
         
@@ -538,39 +402,49 @@
             e.preventDefault();
             
             // 获取输入值
-            const username = usernameInput.value.trim();
-            const appToken = appTokenInput.value.trim();
-            const barkUrl = barkUrlInput.value.trim();
+            const userToken = document.getElementById('ghToken').value.trim();
+            const username = document.getElementById('username').value.trim();
+            const appToken = document.getElementById('appToken').value.trim();
+            const barkUrl = document.getElementById('barkUrl').value.trim();
             
-            // 验证输入
-            if (!username || !appToken) {
-                showMessage(formMessage, '用户名和应用Token是必填项', 'error');
-                return;
-            }
+            // 保存URL到历史记录
+            addToBarkHistory(barkUrl);
             
-            // 验证用户名格式
-            if (!/^[a-zA-Z0-9_-]+$/.test(username)) {
-                showMessage(formMessage, '用户名只能包含字母、数字、下划线和连字符', 'error');
-                return;
-            }
-            
-            // UI状态更新
+            // 禁用按钮并显示加载状态
             const submitBtn = document.getElementById('submitBtn');
             const submitText = document.getElementById('submitText');
             submitBtn.disabled = true;
             submitText.innerHTML = `<span class="loading"></span>提交中...`;
             
+            // 验证输入
+            if (!userToken || !username || !appToken) {
+                showMessage('请填写所有必需字段', 'error');
+                submitBtn.disabled = false;
+                submitText.textContent = '提交配置';
+                return;
+            }
+            
             try {
-                // 1. 获取现有配置
-                const configUrl = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${CONFIG_FILE}`;
-                const response = await fetch(configUrl, {
+                // GitHub仓库信息
+                const repoOwner = "jjbb013";
+                const repoName = "Carbon-account";
+                const configFile = "user-configs.json";
+                const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${configFile}`;
+                
+                // 步骤1: 获取现有配置
+                let response = await fetch(apiUrl, {
                     headers: { 
                         'Accept': 'application/vnd.github.v3+json',
-                        'Authorization': `token ${GITHUB_TOKEN}`
+                        'Authorization': `token ${userToken}`
                     }
                 });
                 
-                // 处理配置加载
+                // 处理认证错误
+                if (response.status === 401) {
+                    throw new Error('GitHub Token无效或权限不足 - 请检查Token权限');
+                }
+                
+                // 加载现有配置
                 let config = {};
                 let sha = null;
                 
@@ -578,28 +452,27 @@
                     const data = await response.json();
                     config = JSON.parse(atob(data.content.replace(/\s/g, '')));
                     sha = data.sha;
+                    showMessage('已加载现有配置', 'success');
                 } else if (response.status !== 404) {
-                    throw new Error(`加载配置失败: ${response.status}`);
+                    throw new Error(`加载配置失败: ${response.status} ${response.statusText}`);
                 }
                 
-                // 2. 更新配置
-                // 保留原有的barkUrl（如果用户没有提供新值）
-                const existingBarkUrl = config[username]?.barkUrl;
+                // 步骤2: 更新配置
                 config[username] = { 
                     appToken: appToken,
-                    barkUrl: barkUrl || existingBarkUrl || null,
+                    barkUrl: barkUrl || null,
                     updatedAt: new Date().toISOString()
                 };
                 
-                // 3. 保存到GitHub
-                const updateResponse = await fetch(configUrl, {
+                // 步骤3: 保存到GitHub
+                const updateResponse = await fetch(apiUrl, {
                     method: 'PUT',
                     headers: {
                         'Accept': 'application/vnd.github.v3+json',
-                        'Authorization': `token ${GITHUB_TOKEN}`
+                        'Authorization': `token ${userToken}`
                     },
                     body: JSON.stringify({
-                        message: `更新用户: ${username}`,
+                        message: `更新配置: ${username}`,
                         content: btoa(JSON.stringify(config, null, 2)),
                         sha: sha
                     })
@@ -610,20 +483,25 @@
                     throw new Error(`保存失败: ${errorData.message || '未知错误'}`);
                 }
                 
-                // 4. 成功处理
-                showMessage(formMessage, `配置保存成功! 用户名: ${username}`, 'success');
+                // 成功处理
+                showMessage(`配置保存成功！用户名: ${username}`, 'success');
                 
-                // 5. 刷新用户列表
-                loadConfig();
-                
-                // 6. 清空表单
-                userSelect.value = '';
-                usernameInput.value = '';
-                appTokenInput.value = '';
-                barkUrlInput.value = '';
+                // 清空敏感字段
+                document.getElementById('ghToken').value = '';
+                document.getElementById('appToken').value = '';
                 
             } catch (error) {
-                showMessage(formMessage, `提交失败: ${error.message}`, 'error');
+                console.error(error);
+                let errorMsg = error.message;
+                
+                // 特殊错误处理
+                if (errorMsg.includes('401')) {
+                    errorMsg = 'GitHub Token无效或权限不足 - 请确认Token有repo权限';
+                } else if (errorMsg.includes('404')) {
+                    errorMsg = '配置文件未找到 - 首次提交可能需要重试';
+                }
+                
+                showMessage(`错误: ${errorMsg}`, 'error', 8000);
                 
             } finally {
                 // 重新启用提交按钮
