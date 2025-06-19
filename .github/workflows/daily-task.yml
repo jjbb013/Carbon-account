@@ -23,7 +23,7 @@ jobs:
         id: signin
         run: |
           # 读取JSON配置文件
-          config_file="user_configs.json"
+          config_file="user-configs.json"
           
           # 准备状态报告文件
           report_file="token-status.json"
