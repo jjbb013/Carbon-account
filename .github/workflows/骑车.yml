@@ -1,41 +1,169 @@
-name: 骑车
+name: 骑车+答题+回收 3 in 1
 
 on:
   schedule:
-    - cron: '29 4 * * 1-5' # 上海时区中午12:29，
-
+    - cron: '10 4 * * *'  # UTC时间4:10，即北京时间12:10
   workflow_dispatch:
 
 jobs:
-  read-config-file:
+  carbon-tasks:
     runs-on: ubuntu-latest
     env:
-      #Request Bike
-      URL: https://carbon-account-server.carbonstop.net/task/complete
-      REQUEST_BODY: '{"value" : 1,"sceneCode" : "MRCJ1888","signMessage" : "cb5632e24c8f83b157c910d6bb2bd525"}'
-
+      # 各任务API设置
+      BIKE_URL: https://carbon-account-server.carbonstop.net/task/complete
+      BIKE_BODY: '{"value":1,"sceneCode":"MRCJ1888","signMessage":"cb5632e24c8f83b157c910d6bb2bd525"}'
+      
+      QUESTION_URL: https://carbon-account-server.carbonstop.net/question/submit
+      QUESTION_BODY: '[{"answerA":"合理保证就是保证数据是绝对准确的  ","correctAnswer":"A","updateTime":"2022-07-15 18:59:16","answerB":"合理保证说明数据是相对准确和可以信赖的","questionTitle":"关于保证等级说法不正确的是","answerC":"任何组织的温室气体核查都可要求作有限保证的评审","answerNum":0,"questionLabels":["001"],"delFlag":0,"answerD":"有限保证对数据的完整性做有限度的评审  ","id":351,"delFlag_name":"正常","questionType_name":"单选","createBy":0,"questionType":1,"answerE":null,"updateBy":0,"questionType_name_format":"单选","answerF":null,"createTime":"2022-07-15 18:54:26","answerG":null},{"answerA":"国际排放因子","correctAnswer":"B","updateTime":"2022-07-15 19:04:26","answerB":"相同工艺\/设备的经验系数获得的排放因子","questionTitle":"在核查过程中常用排放因子法来计算温室气体排放量，以下4类排放因子中，数据质量较高的是（ ）","answerC":"区域排放因子","answerNum":0,"questionLabels":["001"],"delFlag":0,"answerD":"设备制造商提供的系数获得的排放因子","id":316,"delFlag_name":"正常","questionType_name":"单选","createBy":0,"questionType":1,"answerE":null,"updateBy":0,"questionType_name_format":"单选","answerF":null,"createTime":"2022-07-15 18:54:26","answerG":null},{"answerA":"家用冰箱运行3天","correctAnswer":"C","updateTime":"2022-07-15 18:54:26","answerB":"普通电视机持续开1天","questionTitle":"1度电相当于(   ):","answerC":"25瓦的灯泡能连续点亮40小时","answerNum":0,"questionLabels":["001"],"delFlag":0,"answerD":"将20公斤的水烧开","id":406,"delFlag_name":"正常","questionType_name":"单选","createBy":0,"questionType":1,"answerE":null,"updateBy":0,"questionType_name_format":"单选","answerF":null,"createTime":"2022-07-15 18:54:26","answerG":null},{"answerA":"资源","correctAnswer":"A","updateTime":"2022-07-15 18:54:26","answerB":"污染","questionTitle":"通常认为垃圾是放错了地方的__________。","answerC":"废物","answerNum":0,"questionLabels":["001"],"delFlag":0,"answerD":null,"id":107,"delFlag_name":"正常","questionType_name":"单选","createBy":0,"questionType":1,"answerE":null,"updateBy":0,"questionType_name_format":"单选","answerF":null,"createTime":"2022-07-15 18:54:26","answerG":null},{"answerA":"解决好经济增长——能源消费——GHG减排的三角关系","correctAnswer":"A,B,C","updateTime":"2022-07-15 19:02:41","answerB":"调整能源消费结构的同时保障能源供应","questionTitle":"实现”30·60”目标需要直面的三大难题","answerC":"环境治理与减排不能给大众带来沉重的经济负担","answerNum":0,"questionLabels":["001"],"delFlag":0,"answerD":null,"id":550,"delFlag_name":"正常","questionType_name":"多选","createBy":0,"questionType":2,"answerE":null,"updateBy":0,"questionType_name_format":"多选","answerF":null,"createTime":"2022-07-15 18:54:26","answerG":null}]'
+      
+      BOX_URL: https://carbon-account-server.carbonstop.net/task/complete
+      BOX_BODY: '{"sceneCode":"MRCJ1889","value":1,"signMessage":"38173cda070782f86b6c2b3e92192156"}'
+    
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Request Bike
+      - name: 检出代码库
+        uses: actions/checkout@v4
+        
+      - name: 安装必要工具
+        run: sudo apt-get -qq install jq
+        
+      - name: 检查配置文件
+        run: |
+          if [ ! -f "user-configs.json" ]; then
+            echo "::error::配置文件 user-configs.json 不存在！"
+            exit 1
+          else
+            echo "✅ 找到配置文件 user-configs.json"
+            echo "📋 用户列表:"
+            jq -r 'keys[]' user-configs.json
+          fi
+        
+      - name: 执行骑车任务 (1次)
         run: |
           #!/bin/bash
-          # Read the configuration file and process each line
-          while IFS='=' read -r name token; do
-            echo "Key: $name, Value: $token"
-            echo "正在执行的账户: $name"
-            curl -X POST \
-            -H "Content-Type: application/json" \
-            -H "Authorization:$token" \
-            -d "$REQUEST_BODY" \
-            $URL \
-            -o response.json
+          echo "🚴 开始骑车任务 (1次执行)"
+          echo "▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄"
           
-            echo "Response:"
-            cat response.json  
-          done < config.properties
-      - name: Log response status
+          while IFS='=' read -r user token; do
+            echo "🔄 处理用户: $user"
+            
+            # 检查token是否为空
+            if [ -z "$token" ] || [ "$token" = "null" ]; then
+              echo "⚠️ 警告: $user 的appToken为空或未设置"
+              continue
+            fi
+            
+            # 执行骑车请求
+            echo "🔍 请求详情:"
+            #echo "  URL: $BIKE_URL"
+            #echo "  Token: $token"
+            #echo "  Body: $BIKE_BODY"
+            
+            curl -s -w "\n" -X POST \
+              -H "Content-Type: application/json" \
+              -H "Authorization: $token" \
+              -d "$BIKE_BODY" \
+              $BIKE_URL
+              
+            echo  # 添加空行
+          done < <(jq -r 'to_entries[] | "\(.key)=\(.value.appToken)"' user-configs.json)
+          
+          echo "🏁 骑车任务完成"
+        
+      - name: 执行答题任务 (2次)
         run: |
-          RESPONSE_STATUS=$(jq -r '.status' response.json)
-          echo -e "Response Status: $RESPONSE_STATUS \n"
+          #!/bin/bash
+          function execute_questions() {
+            local round=$1
+            echo "➡️ 答题任务第${round}轮开始"
+            
+            while IFS='=' read -r user token; do
+              echo "▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄"
+              echo "🔄 处理用户: $user"
+              
+              # 检查token是否为空
+              if [ -z "$token" ] || [ "$token" = "null" ]; then
+                echo "⚠️ 警告: $user 的appToken为空或未设置"
+                continue
+              fi
+              
+              # 执行答题请求
+              echo "🔍 请求详情:"
+              #echo "  URL: $QUESTION_URL"
+              #echo "  Token: $token"
+              #echo "  Body: $QUESTION_BODY"
+              
+              curl -s -w "\n" -X POST \
+                -H "Content-Type: application/json" \
+                -H "Authorization: $token" \
+                -d "$QUESTION_BODY" \
+                $QUESTION_URL
+                
+              echo  # 添加空行
+              sleep 1  # 用户间短暂间隔
+            done < <(jq -r 'to_entries[] | "\(.key)=\(.value.appToken)"' user-configs.json)
+          }
+          
+          # 第一轮答题
+          execute_questions 1
+          
+          # 等待10秒后进行第二轮
+          echo -e "\n🕒 等待10秒后进行第二轮答题...\n"
+          sleep 10
+          
+          # 第二轮答题
+          execute_questions 2
+          
+          echo "🏁 答题任务完成"
+        
+      - name: 执行回收任务 (3次)
+        run: |
+          #!/bin/bash
+          function execute_box() {
+            local round=$1
+            echo "♻️ 回收任务第${round}轮开始"
+            
+            while IFS='=' read -r user token; do
+              echo "▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄"
+              echo "🔄 处理用户: $user"
+              
+              # 检查token是否为空
+              if [ -z "$token" ] || [ "$token" = "null" ]; then
+                echo "⚠️ 警告: $user 的appToken为空或未设置"
+                continue
+              fi
+              
+              # 执行回收请求
+              echo "🔍 请求详情:"
+              #echo "  URL: $BOX_URL"
+              #echo "  Token: $token"
+              #echo "  Body: $BOX_BODY"
+              
+              curl -s -w "\n" -X POST \
+                -H "Content-Type: application/json" \
+                -H "Authorization: $token" \
+                -d "$BOX_BODY" \
+                $BOX_URL
+                
+              echo  # 添加空行
+              sleep 1  # 用户间短暂间隔
+            done < <(jq -r 'to_entries[] | "\(.key)=\(.value.appToken)"' user-configs.json)
+          }
+          
+          # 第一轮回收
+          execute_box 1
+          
+          # 等待10秒后进行第二轮
+          echo -e "\n🕒 等待10秒后进行第二轮回收...\n"
+          sleep 10
+          
+          # 第二轮回收
+          execute_box 2
+          
+          # 等待10秒后进行第三轮
+          echo -e "\n🕒 等待10秒后进行第三轮回收...\n"
+          sleep 10
+          
+          # 第三轮回收
+          execute_box 3
+          
+          echo "🏁 回收任务完成"
