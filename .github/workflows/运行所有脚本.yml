@@ -4,60 +4,74 @@ on:
   workflow_dispatch:  # 允许手动触发此工作流
 
 jobs:
-  run-scripts:
+  run-all-scripts:
     runs-on: ubuntu-latest
     steps:
-      - name: 爬楼
-        uses: actions/github-script@v4
+      # 第一步：执行签到任务（最优先）
+      - name: 触发签到任务
+        uses: actions/github-script@v6
         with:
           script: |
-            await github.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'Daily POST Request 24F to 1F.yml',
-              ref: 'master'  // 根据你的实际分支名称替换
-            });
-
-      - name: 答题
-        uses: actions/github-script@v4
+            try {
+              await github.rest.actions.createWorkflowDispatch({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id: '签到.yml',
+                ref: '${{ github.ref }}'
+              });
+              console.log('✅ 签到任务触发成功');
+            } catch (error) {
+              console.error('❌ 触发签到任务失败:', error.message);
+              core.setFailed('签到任务触发失败');
+            }
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      
+      # 第二步：执行答题骑车回收任务（签到后）
+      - name: 触发答题骑车回收任务
+        uses: actions/github-script@v6
         with:
           script: |
-            await github.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'Daily POST Request Question.yml',
-              ref: 'master'  
-            });
-
-      - name: 骑车
-        uses: actions/github-script@v4
+            try {
+              await new Promise(resolve => setTimeout(resolve, 5000)); // 等待5秒
+              await github.rest.actions.createWorkflowDispatch({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id: '答题骑车回收3in1.yml',
+                ref: '${{ github.ref }}'
+              });
+              console.log('✅ 答题骑车回收任务触发成功');
+            } catch (error) {
+              console.error('❌ 触发答题骑车回收任务失败:', error.message);
+              core.setFailed('答题骑车回收任务触发失败');
+            }
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      
+      # 第三步：执行爬楼任务（最后）
+      - name: 触发爬楼任务
+        uses: actions/github-script@v6
         with:
           script: |
-            await github.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'Daily_POST_Request_Bike.yml',
-              ref: 'master'  
-            });
-
-      - name: 回收
-        uses: actions/github-script@v4
-        with:
-          script: |
-            await github.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'Daily_POST_Request_Box.yml',
-              ref: 'master'  
-            });
-
-      - name: 签到
-        uses: actions/github-script@v4
-        with:
-          script: |
-            await github.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'Daily_POST_Request_SignIn.yml',
-              ref: 'master'  
-            });
+            try {
+              await new Promise(resolve => setTimeout(resolve, 10000)); // 等待10秒
+              await github.rest.actions.createWorkflowDispatch({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id: '爬楼.yml',
+                ref: '${{ github.ref }}'
+              });
+              console.log('✅ 爬楼任务触发成功');
+            } catch (error) {
+              console.error('❌ 触发爬楼任务失败:', error.message);
+              core.setFailed('爬楼任务触发失败');
+            }
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      
+      # 最终步骤：显示完成信息
+      - name: 完成提示
+        run: |
+          echo "🎉 所有脚本已成功触发！"
+          echo "请检查各工作流运行状态"
+          echo "1. 签到任务: https://github.com/${{ github.repository }}/actions/workflows/签到.yml"
+          echo "2. 答题骑车回收任务: https://github.com/${{ github.repository }}/actions/workflows/答题骑车回收3in1.yml"
+          echo "3. 爬楼任务: https://github.com/${{ github.repository }}/actions/workflows/爬楼.yml"
+        if: always()  # 无论前面步骤是否失败都执行
