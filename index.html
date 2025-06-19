@@ -3,13 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>碳账户配置提交 - GitHub免费方案</title>
+    <meta name="description" content="通过此页面安全提交碳账户配置到GitHub仓库">
+    <title>碳账户配置提交 - GitHub方案2</title>
     <style>
         :root {
             --primary: #238636;
             --error: #d73a49;
             --warning: #e36209;
             --success: #2c974b;
+            --gray: #f6f8fa;
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
@@ -18,84 +20,118 @@
             margin: 0 auto;
             padding: 20px;
             color: #333;
-            background-color: #f6f8fa;
+            background-color: var(--gray);
         }
         .container {
             background-color: white;
-            padding: 20px;
+            padding: 25px;
             border-radius: 10px;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
         }
         h1 {
             color: var(--primary);
             text-align: center;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
         }
         .warning-box {
             background-color: #fff8e6;
             border-left: 4px solid var(--warning);
-            padding: 12px;
-            margin-bottom: 20px;
+            padding: 15px;
+            margin-bottom: 25px;
             border-radius: 0 4px 4px 0;
+        }
+        .warning-box p {
+            margin: 5px 0;
         }
         form {
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 20px;
+        }
+        .form-group {
+            margin-bottom: 10px;
         }
         label {
             font-weight: 600;
             display: block;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
+            color: #444;
         }
-        input, button {
-            padding: 10px 12px;
+        input {
+            padding: 12px;
             border: 1px solid #d1d5da;
             border-radius: 6px;
             width: 100%;
             box-sizing: border-box;
             font-size: 16px;
         }
+        input:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(35, 134, 54, 0.1);
+        }
         button {
+            padding: 14px;
             background: var(--primary);
             color: white;
             cursor: pointer;
             font-weight: 500;
-            transition: background-color 0.2s;
+            font-size: 17px;
+            transition: background-color 0.2s, transform 0.1s;
             border: none;
+            border-radius: 6px;
+            margin-top: 10px;
         }
         button:hover {
             background: #2ea043;
         }
+        button:active {
+            transform: translateY(1px);
+        }
+        button:disabled {
+            background: #a3d1ad;
+            cursor: not-allowed;
+        }
         .message {
-            margin-top: 16px;
-            padding: 12px;
+            margin-top: 20px;
+            padding: 15px;
             border-radius: 6px;
-            border-left: 4px solid;
         }
         .success {
             color: var(--success);
             background-color: #f0fff4;
-            border-color: var(--success);
+            border: 1px solid rgba(44, 151, 75, 0.3);
         }
         .error {
             color: var(--error);
             background-color: #fff1f0;
-            border-color: var(--error);
+            border: 1px solid rgba(215, 58, 73, 0.3);
         }
         .loading {
             display: inline-block;
-            width: 16px;
-            height: 16px;
-            border: 2px solid rgba(255,255,255,0.3);
+            width: 18px;
+            height: 18px;
+            border: 3px solid rgba(255,255,255,0.3);
             border-radius: 50%;
             border-top-color: white;
             animation: spin 1s ease-in-out infinite;
-            margin-right: 8px;
+            margin-right: 10px;
             vertical-align: middle;
         }
         @keyframes spin {
             to { transform: rotate(360deg); }
+        }
+        .instructions {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 8px;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #666;
+            font-size: 0.85rem;
         }
     </style>
 </head>
@@ -104,26 +140,33 @@
         <h1>碳账户配置提交</h1>
         
         <div class="warning-box">
-            <strong>注意:</strong> 这是公开存储方案 - 配置信息将存储在公开仓库中。请勿用于敏感凭证。
+            <p><strong>重要提示：</strong>您需要创建GitHub Token以提交配置</p>
+            <p>1. 访问 <a href="https://github.com/settings/tokens" target="_blank">GitHub Tokens</a></p>
+            <p>2. 创建具有<strong>repo</strong>权限的Token</p>
+            <p>3. 复制Token并粘贴到下方</p>
         </div>
         
         <form id="configForm">
-            <div>
-                <label for="username">用户名（唯一标识）:</label>
-                <input type="text" id="username" required minlength="3" 
-                       placeholder="只允许字母、数字、下划线">
+            <div class="form-group">
+                <label for="ghToken">您的GitHub Token (必需)</label>
+                <input type="password" id="ghToken" required placeholder="ghp_xxxxxxxx" autocomplete="off">
+                <p class="instructions">Token需要repo权限才能更新配置</p>
             </div>
             
-            <div>
-                <label for="appToken">App Token:</label>
-                <input type="password" id="appToken" required minlength="10" 
-                       placeholder="用于定时任务请求的凭证">
+            <div class="form-group">
+                <label for="username">用户名（唯一标识）</label>
+                <input type="text" id="username" required placeholder="my_app_user">
             </div>
             
-            <div>
-                <label for="barkUrl">Bark通知URL（可选）:</label>
-                <input type="url" id="barkUrl" 
-                       placeholder="https://api.day.app/xxxxxx">
+            <div class="form-group">
+                <label for="appToken">应用Token</label>
+                <input type="password" id="appToken" required placeholder="用于定时任务的凭证">
+            </div>
+            
+            <div class="form-group">
+                <label for="barkUrl">Bark通知URL（可选）</label>
+                <input type="url" id="barkUrl" placeholder="https://api.day.app/xxxxxx">
+                <p class="instructions">用于接收通知的设备URL</p>
             </div>
             
             <button type="submit" id="submitBtn">
@@ -132,148 +175,132 @@
         </form>
         
         <div id="message"></div>
+        
+        <div class="footer">
+            <p>此工具免费运行于GitHub平台 | 配置存储于仓库 <a href="https://github.com/jjbb013/Carbon-account">Carbon-account</a></p>
+        </div>
     </div>
 
     <script>
-        // 配置GitHub存储信息
-        const REPO_OWNER = "jjbb013";
-        const REPO_NAME = "Carbon-account";
-        const CONFIG_FILE = "user-configs.json";
-        const GITHUB_TOKEN = "{{ secrets.GH_TOKEN }}"; // 在仓库Secrets中设置GH_TOKEN
+        // 显示消息的函数
+        function showMessage(text, type = 'info', duration = 5000) {
+            const messageEl = document.getElementById('message');
+            messageEl.innerHTML = `<div class="message ${type}">${text}</div>`;
+            
+            if (type === 'success' && duration > 0) {
+                setTimeout(() => messageEl.innerHTML = '', duration);
+            }
+        }
         
+        // 处理表单提交
         document.getElementById('configForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const submitBtn = document.getElementById('submitBtn');
-            const submitText = document.getElementById('submitText');
             
-            // UI状态更新
-            submitBtn.disabled = true;
-            submitText.innerHTML = `<span class="loading"></span>处理中...`;
-
-            // 获取表单数据
-            const username = sanitizeInput(document.getElementById('username').value.trim());
+            // 获取输入值
+            const userToken = document.getElementById('ghToken').value.trim();
+            const username = document.getElementById('username').value.trim();
             const appToken = document.getElementById('appToken').value.trim();
             const barkUrl = document.getElementById('barkUrl').value.trim();
             
+            // 禁用按钮并显示加载状态
+            const submitBtn = document.getElementById('submitBtn');
+            const submitText = document.getElementById('submitText');
+            submitBtn.disabled = true;
+            submitText.innerHTML = `<span class="loading"></span>提交中...`;
+            
             // 验证输入
-            if (!username || !appToken) {
-                showMessage('用户名和App Token是必填项', 'error');
-                submitBtn.disabled = false;
-                submitText.textContent = '提交配置';
-                return;
-            }
-
-            // 用户名格式验证
-            if (!/^[a-zA-Z0-9_-]+$/.test(username)) {
-                showMessage('用户名只能包含字母、数字、下划线和连字符', 'error');
+            if (!userToken || !username || !appToken) {
+                showMessage('请填写所有必需字段', 'error');
                 submitBtn.disabled = false;
                 submitText.textContent = '提交配置';
                 return;
             }
             
             try {
-                // 1. 读取现有配置
-                const { config, sha } = await loadConfig();
+                // GitHub仓库信息
+                const repoOwner = "jjbb013";
+                const repoName = "Carbon-account";
+                const configFile = "user-configs.json";
+                const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${configFile}`;
                 
-                // 2. 更新配置
+                // 步骤1: 获取现有配置
+                let response = await fetch(apiUrl, {
+                    headers: { 
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Authorization': `token ${userToken}`
+                    }
+                });
+                
+                // 处理认证错误
+                if (response.status === 401) {
+                    throw new Error('GitHub Token无效或权限不足 - 请检查Token权限');
+                }
+                
+                // 加载现有配置
+                let config = {};
+                let sha = null;
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    config = JSON.parse(atob(data.content.replace(/\s/g, '')));
+                    sha = data.sha;
+                    showMessage('已加载现有配置', 'success');
+                } else if (response.status !== 404) {
+                    throw new Error(`加载配置失败: ${response.status} ${response.statusText}`);
+                }
+                
+                // 步骤2: 更新配置
                 config[username] = { 
                     appToken: appToken,
                     barkUrl: barkUrl || null,
                     updatedAt: new Date().toISOString()
                 };
                 
-                // 3. 保存配置
-                await saveConfig(config, sha, username);
+                // 步骤3: 保存到GitHub
+                const updateResponse = await fetch(apiUrl, {
+                    method: 'PUT',
+                    headers: {
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Authorization': `token ${userToken}`
+                    },
+                    body: JSON.stringify({
+                        message: `更新配置: ${username}`,
+                        content: btoa(JSON.stringify(config, null, 2)),
+                        sha: sha
+                    })
+                });
                 
-                // 4. 成功反馈
-                showMessage(`配置保存成功: ${username}`, 'success');
-                
-                // 5. 清空敏感字段
-                document.getElementById('appToken').value = '';
-            } catch (error) {
-                console.error('保存失败:', error);
-                let errorMsg = error.message || '未知错误';
-                
-                // 特定错误处理
-                if (errorMsg.includes('Bad credentials')) {
-                    errorMsg = 'Token无效或无权限，请检查GH_TOKEN设置';
-                } else if (errorMsg.includes('403')) {
-                    errorMsg = 'API请求超出限制，请稍后再试';
+                if (!updateResponse.ok) {
+                    const errorData = await updateResponse.json();
+                    throw new Error(`保存失败: ${errorData.message || '未知错误'}`);
                 }
                 
-                showMessage(`保存失败: ${errorMsg}`, 'error');
+                // 成功处理
+                showMessage(`配置保存成功！用户名: ${username}`, 'success');
+                
+                // 清空敏感字段
+                document.getElementById('ghToken').value = '';
+                document.getElementById('appToken').value = '';
+                
+            } catch (error) {
+                console.error(error);
+                let errorMsg = error.message;
+                
+                // 特殊错误处理
+                if (errorMsg.includes('401')) {
+                    errorMsg = 'GitHub Token无效或权限不足 - 请确认Token有repo权限';
+                } else if (errorMsg.includes('404')) {
+                    errorMsg = '配置文件未找到 - 首次提交可能需要重试';
+                }
+                
+                showMessage(`错误: ${errorMsg}`, 'error', 8000);
+                
             } finally {
+                // 重新启用提交按钮
                 submitBtn.disabled = false;
                 submitText.textContent = '提交配置';
             }
         });
-        
-        // 安全处理输入
-        function sanitizeInput(input) {
-            return input.replace(/[<>"']/g, "");
-        }
-        
-        // 显示状态消息
-        function showMessage(text, type = 'info') {
-            const messageEl = document.getElementById('message');
-            messageEl.innerHTML = `<div class="message ${type}">${text}</div>`;
-        }
-        
-        // 加载配置文件
-        async function loadConfig() {
-            const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${CONFIG_FILE}`;
-            let config = {};
-            let sha = null;
-            
-            try {
-                const response = await fetch(url, {
-                    headers: { 
-                        'Accept': 'application/vnd.github.v3+json',
-                        'Authorization': `token ${GITHUB_TOKEN}`
-                    }
-                });
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    config = JSON.parse(atob(data.content.replace(/\s/g, '')));
-                    sha = data.sha;
-                } else if (response.status === 404) {
-                    // 新文件不存在时正常处理
-                    console.log('配置文件不存在，将创建新文件');
-                } else {
-                    throw new Error(`读取失败: ${response.status} ${response.statusText}`);
-                }
-            } catch (error) {
-                throw new Error(`加载配置时出错: ${error.message}`);
-            }
-            
-            return { config, sha };
-        }
-        
-        // 保存配置到GitHub
-        async function saveConfig(config, sha, username) {
-            const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${CONFIG_FILE}`;
-            
-            const response = await fetch(url, {
-                method: 'PUT',
-                headers: {
-                    'Accept': 'application/vnd.github.v3+json',
-                    'Authorization': `token ${GITHUB_TOKEN}`
-                },
-                body: JSON.stringify({
-                    message: `更新配置: ${username}`,
-                    content: btoa(JSON.stringify(config, null, 2)),
-                    sha: sha
-                })
-            });
-            
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(`API错误: ${errorData.message}`);
-            }
-            
-            return true;
-        }
     </script>
 </body>
 </html>
