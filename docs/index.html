@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>碳账户配置提交</title>
+    <style>
+        body { font-family: Arial; max-width: 600px; margin: 0 auto; padding: 20px; }
+        form { display: flex; flex-direction: column; gap: 12px; }
+        input, button { padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        button { background: #238636; color: white; cursor: pointer; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>提交碳账户配置</h1>
+    <form id="configForm">
+        <label for="username">用户名（唯一标识）:</label>
+        <input type="text" id="username" required>
+        
+        <label for="appToken">App Token:</label>
+        <input type="text" id="appToken" required>
+        
+        <label for="barkUrl">Bark通知URL（可选）:</label>
+        <input type="url" id="barkUrl" placeholder="https://api.day.app/xxx">
+        
+        <button type="submit">提交配置</button>
+    </form>
+    <div id="message"></div>
+
+    <script>
+        document.getElementById('configForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value.trim();
+            const appToken = document.getElementById('appToken').value.trim();
+            const barkUrl = document.getElementById('barkUrl').value.trim();
+
+            try {
+                // 通过GitHub API更新配置文件
+                const response = await updateConfig(username, appToken, barkUrl);
+                document.getElementById('message').innerHTML = 
+                    `<p class="success">配置保存成功！用户名: ${username}</p>`;
+            } catch (error) {
+                document.getElementById('message').innerHTML = 
+                    `<p class="error">保存失败: ${error.message}</p>`;
+            }
+        });
+
+        async function updateConfig(username, appToken, barkUrl) {
+            const repo = "jjbb013/Carbon-account";
+            const filePath = "user-configs.json";
+            const apiUrl = `https://api.github.com/repos/${repo}/contents/${filePath}`;
+            
+            // 读取现有配置
+            let config = {};
+            try {
+                const res = await fetch(apiUrl, {
+                    headers: { 'Accept': 'application/vnd.github.v3+json' }
+                });
+                const data = await res.json();
+                config = JSON.parse(atob(data.content.replace(/\s/g, '')));
+            } catch {} // 文件不存在时忽略
+
+            // 更新配置
+            config[username] = { appToken, barkUrl };
+
+            // 提交更新
+            const response = await fetch(apiUrl, {
+                method: 'PUT',
+                headers: { 'Accept': 'application/vnd.github.v3+json' },
+                body: JSON.stringify({
+                    message: `Update config for ${username}`,
+                    content: btoa(JSON.stringify(config, null, 2)),
+                    sha: await getFileSha(apiUrl)
+                })
+            });
+            if (!response.ok) throw new Error(await response.text());
+            return response;
+        }
+
+        async function getFileSha(apiUrl) {
+            try {
+                const res = await fetch(apiUrl, {
+                    headers: { 'Accept': 'application/vnd.github.v3+json' }
+                });
+                const data = await res.json();
+                return data.sha;
+            } catch { return null; }
+        }
+    </script>
+</body>
+</html>
