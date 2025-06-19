@@ -46,10 +46,10 @@ jobs:
             fi
             
             # 执行答题请求
-            echo "🔍 请求详情:"
-            echo "  URL: $API_URL"
-            echo "  Token: $token"
-            echo "  Body: $REQUEST_BODY"
+            #echo "🔍 请求详情:"
+            #echo "  URL: $API_URL"
+            #echo "  Token: $token"
+            #echo "  Body: $REQUEST_BODY"
             
             curl -s -X POST \
               -H "Content-Type: application/json" \
