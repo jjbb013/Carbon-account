@@ -19,18 +19,6 @@ jobs:
       - name: 安装必要工具
         run: sudo apt-get -qq install jq && echo "工具安装完成"
         
-      - name: 检查配置文件
-        run: |
-          config_file="user-configs.json"
-          if [ ! -f "$config_file" ]; then
-            echo "::error::配置文件 $config_file 不存在！"
-            exit 1
-          else
-            echo "✅ 找到配置文件 $config_file"
-            echo "📋 用户列表:"
-            jq -r 'keys[]' $config_file
-          fi
-        
       - name: 处理用户签到
         id: signin
         run: |
@@ -88,17 +76,26 @@ jobs:
             cat "$raw_file"
             echo "------------------------"
             
-            # 解析响应状态
-            status=$(echo $json_content | jq -r '.status? // empty' 2>/dev/null || echo "解析失败")
-            message=$(echo $json_content | jq -r '.message? // empty' 2>/dev/null || echo "解析失败")
+            # 关键修复：改进响应解析逻辑
+            # 使用直接文本搜索代替JSON解析（防止部分响应无JSON格式）
+            token_invalid=false
+            if grep -q "token校验失败" "$raw_file" || 
+               grep -q "\"code\":600" "$raw_file" || 
+               grep -q "\"code\": 600" "$raw_file"; then
+              token_invalid=true
+            fi
+            
+            # 补充JSON解析（如果可用）
+            code=$(echo $json_content | jq -r '.code? // empty' 2>/dev/null || echo "解析失败")
+            msg=$(echo $json_content | jq -r '.msg? // empty' 2>/dev/null || echo "解析失败")
             
             # 记录状态信息
             timestamp=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
-            status_data="{\"user\":\"$user\",\"timestamp\":\"$timestamp\",\"httpStatus\":$http_code,\"apiStatus\":\"$status\",\"message\":\"$message\",\"rawFile\":\"$raw_file\"}"
+            status_data="{\"user\":\"$user\",\"timestamp\":\"$timestamp\",\"httpStatus\":$http_code,\"apiCode\":\"$code\",\"apiMsg\":\"$msg\",\"tokenInvalid\":$token_invalid,\"rawFile\":\"$raw_file\"}"
             jq --argjson data "$status_data" '. += [$data]' $report_file > temp.json && mv temp.json $report_file
             
-            # 检查token是否失效
-            if [[ "$message" == *"token校验失败"* || $http_code -eq 401 ]]; then
+            # 检查token是否失效（关键修复）
+            if $token_invalid; then
               echo "❌ 检测到Token失效: $user"
               
               # 发送个人通知
@@ -122,7 +119,7 @@ jobs:
           echo "================================="
           echo "📊 用户签到执行摘要"
           echo "---------------------------------"
-          jq -r '.[] | "用户: \(.user), 状态: \(if (.message | contains("token校验失败")) or .httpStatus == 401 then "失败" else "成功" end), 原始文件: \(.rawFile)"' token-status.json
+          jq -r '.[] | "用户: \(.user), 状态: \(if .tokenInvalid then "失败" else "成功" end), 原因: \(.apiMsg), 原始文件: \(.rawFile)"' token-status.json
           echo "================================="
         
       - name: 保存状态报告
