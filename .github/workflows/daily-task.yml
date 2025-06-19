@@ -1,0 +1,68 @@
+name: 碳账户定时任务
+
+on:
+  schedule:
+    - cron: '30 4 * * *'  # UTC时间4:30（北京时间12:30）
+  workflow_dispatch:
+
+jobs:
+  process-users:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+        
+      - name: 加载配置
+        id: config
+        run: |
+          # 读取配置文件
+          CONFIG_FILE='user-configs.json'
+          
+          if [ ! -f "$CONFIG_FILE" ]; then
+            echo "::error::配置文件 $CONFIG_FILE 不存在"
+            exit 1
+          fi
+          
+          echo "CONFIG_JSON=$(cat $CONFIG_FILE | jq -c)" >> $GITHUB_ENV
+          echo "成功加载配置"
+          
+      - name: 执行请求
+        env:
+          REQUEST_BODY: '{"value" : 1,"sceneCode" : "MRCJ0002","signMessage" : "2c2b34840b8ec9fb735e1b2bed8533fa"}'
+          BASE_URL: 'https://carbon-account-server.carbonstop.net/task/complete'
+        run: |
+          echo "${{ env.CONFIG_JSON }}" | jq -r 'to_entries[] | .key' | while read username; do
+            # 提取配置信息
+            TOKEN=$(echo "${{ env.CONFIG_JSON }}" | jq -r .\"$username\".appToken)
+            BARK_URL=$(echo "${{ env.CONFIG_JSON }}" | jq -r .\"$username\".barkUrl)
+            
+            # 打印日志
+            echo "处理用户: $username"
+            
+            # 发送请求
+            RESPONSE=$(curl -s -X POST \
+              -H "Content-Type: application/json" \
+              -H "Authorization: $TOKEN" \
+              -d "$REQUEST_BODY" \
+              "$BASE_URL")
+            
+            # 记录响应
+            echo "响应: $RESPONSE"
+            
+            # 错误处理
+            if echo "$RESPONSE" | grep -q "token校验失败"; then
+              echo "Token校验失败: $username"
+              if [ "$BARK_URL" != "null" ] && [ -n "$BARK_URL" ]; then
+                curl -s -X POST -H "Content-Type: application/json" \
+                  -d "{\"title\":\"碳账户Token失效\",\"body\":\"$username Token校验失败\"}" \
+                  "$BARK_URL"
+                echo "已发送Bark通知"
+              fi
+            else
+              echo "Token可用: $username"
+            fi
+          done
+          
+      - name: 完成通知
+        run: |
+          echo "定时任务执行完成于 $(date)"
