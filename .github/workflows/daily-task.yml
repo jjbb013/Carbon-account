@@ -1,68 +1,104 @@
-name: 碳账户定时任务
+name: 碳账户签到
 
 on:
   schedule:
-    - cron: '30 4 * * *'  # UTC时间4:30（北京时间12:30）
+    - cron: '1 1 * * *'  # UTC时间1:01，即北京时间9:01执行
   workflow_dispatch:
 
 jobs:
-  process-users:
+  carbon-signin:
     runs-on: ubuntu-latest
+    env:
+      API_URL: https://carbon-account-server.carbonstop.net/task/complete
+      REQUEST_BODY: '{"value":1,"sceneCode":"MRCJ0002","signMessage":"2c2b34840b8ec9fb735e1b2bed8533fa"}'
+    
     steps:
-      - name: 检出代码
-        uses: actions/checkout@v4
+      - name: 检出代码库
+        uses: actions/checkout@v3
         
-      - name: 加载配置
-        id: config
+      - name: 安装jq工具
+        run: sudo apt-get -qq install jq
+
+      - name: 执行用户签到任务
+        id: signin
         run: |
-          # 读取配置文件
-          CONFIG_FILE='user-configs.json'
+          # 读取JSON配置文件
+          config_file="user_config.json"
+          users=$(jq -r 'keys[]' $config_file)
           
-          if [ ! -f "$CONFIG_FILE" ]; then
-            echo "::error::配置文件 $CONFIG_FILE 不存在"
-            exit 1
-          fi
+          # 初始化结果统计
+          success_count=0
+          failed_count=0
+          failed_users=""
           
-          echo "CONFIG_JSON=$(cat $CONFIG_FILE | jq -c)" >> $GITHUB_ENV
-          echo "成功加载配置"
-          
-      - name: 执行请求
-        env:
-          REQUEST_BODY: '{"value" : 1,"sceneCode" : "MRCJ0002","signMessage" : "2c2b34840b8ec9fb735e1b2bed8533fa"}'
-          BASE_URL: 'https://carbon-account-server.carbonstop.net/task/complete'
-        run: |
-          echo "${{ env.CONFIG_JSON }}" | jq -r 'to_entries[] | .key' | while read username; do
-            # 提取配置信息
-            TOKEN=$(echo "${{ env.CONFIG_JSON }}" | jq -r .\"$username\".appToken)
-            BARK_URL=$(echo "${{ env.CONFIG_JSON }}" | jq -r .\"$username\".barkUrl)
+          # 处理每个用户
+          for user in $users; do
+            echo "▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄"
+            echo "🔄 正在处理用户: $user"
             
-            # 打印日志
-            echo "处理用户: $username"
+            # 提取用户配置
+            token=$(jq -r ".$user.appToken" $config_file)
+            bark_url=$(jq -r ".$user.barkUrl" $config_file)
             
-            # 发送请求
-            RESPONSE=$(curl -s -X POST \
+            # 执行签到请求
+            response=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -X POST \
               -H "Content-Type: application/json" \
-              -H "Authorization: $TOKEN" \
+              -H "Authorization: $token" \
               -d "$REQUEST_BODY" \
-              "$BASE_URL")
+              $API_URL)
             
-            # 记录响应
-            echo "响应: $RESPONSE"
+            # 分离HTTP状态码和响应体
+            http_status=$(echo "$response" | grep HTTP_STATUS | cut -d':' -f2)
+            json_response=$(echo "$response" | sed '/HTTP_STATUS/d')
             
-            # 错误处理
-            if echo "$RESPONSE" | grep -q "token校验失败"; then
-              echo "Token校验失败: $username"
-              if [ "$BARK_URL" != "null" ] && [ -n "$BARK_URL" ]; then
-                curl -s -X POST -H "Content-Type: application/json" \
-                  -d "{\"title\":\"碳账户Token失效\",\"body\":\"$username Token校验失败\"}" \
-                  "$BARK_URL"
-                echo "已发送Bark通知"
+            # 解析响应状态
+            status=$(echo $json_response | jq -r '.status')
+            message=$(echo $json_response | jq -r '.message // empty')
+            
+            echo "📡 响应状态: $http_status | API状态: ${status:-null} | 消息: ${message:-none}"
+            
+            # 检查token是否失效
+            if [[ "$message" == *"token校验失败"* || "$http_status" == 401 ]]; then
+              echo "❌ 检测到Token失效: $user"
+              failed_count=$((failed_count+1))
+              failed_users="$failed_users$user, "
+              
+              # 发送个人通知
+              if [[ -n "$bark_url" ]]; then
+                echo "📤 发送Bark通知到: $user"
+                curl -s -X POST \
+                  -H 'Content-Type: application/json' \
+                  -d "{\"title\":\"碳账户Token失效\",\"body\":\"$user 的Token已失效，请及时更新！\"}" \
+                  "$bark_url"
+              else
+                echo "⚠️ 未找到$user的Bark URL，跳过通知"
               fi
+              
+              # 记录失效token到文件
+              echo "{\"user\":\"$user\",\"timestamp\":\"$(date -u +'%Y-%m-%dT%H:%M:%SZ')\",\"status\":\"invalid\"}" >> token-status.json
             else
-              echo "Token可用: $username"
+              echo "✅ 签到成功: $user"
+              success_count=$((success_count+1))
             fi
+            
+            # 添加空行分隔日志
+            echo ""
           done
           
-      - name: 完成通知
-        run: |
-          echo "定时任务执行完成于 $(date)"
+          # 准备摘要报告
+          summary="📊 签到摘要 | 成功: $success_count | 失败: $failed_count"
+          if [ $failed_count -gt 0 ]; then
+            summary="$summary | 失效用户: ${failed_users%, }"
+          fi
+          
+          echo "::set-output name=summary::$summary"
+        
+      - name: 显示执行摘要
+        run: echo "${{ steps.signin.outputs.summary }}"
+        
+      - name: 上传Token状态记录
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: token-status-${{ github.run_id }}
+          path: token-status.json
