@@ -1,64 +1,170 @@
-name: 签到
+name: 碳账户签到
 
 on:
   schedule:
-    - cron: '1 1 * * *' 
-
+    - cron: '1 1 * * *'  # UTC时间1:01，即北京时间9:01执行
   workflow_dispatch:
 
 jobs:
-  read-config-file:
+  carbon-signin:
     runs-on: ubuntu-latest
+    # 关键修复：添加推送所需的权限
+    permissions:
+      contents: write  # 允许写入仓库内容
     env:
-      #Request SignIn
-      URL: https://carbon-account-server.carbonstop.net/task/complete
-      REQUEST_BODY: '{"value" : 1,"sceneCode" : "MRCJ0002","signMessage" : "2c2b34840b8ec9fb735e1b2bed8533fa"}'
-      
+      API_URL: https://carbon-account-server.carbonstop.net/task/complete
+      REQUEST_BODY: '{"value":1,"sceneCode":"MRCJ0002","signMessage":"2c2b34840b8ec9fb735e1b2bed8533fa"}'
+    
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Read Bark URL from properties
-        id: read_bark_url
+      - name: 检出代码库（包含日志）
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 获取完整历史记录以便推送日志
+          token: ${{ secrets.GH_TOKEN }}  # 使用具有写权限的令牌
+        
+      - name: 安装必要工具
         run: |
-          #!/bin/bash
-          # 读取 bark.properties 文件中的 BARKURL
-          while IFS='=' read -r key value; do
-            if [ "$key" == "BARKURL" ]; then
-              echo "Bark URL is: $value"
-              echo "::set-output name=bark_url::$value"  # 设置输出变量
-            fi
-          done < bark.properties
-
-      - name: Request SignIn
+          sudo apt-get -qq install jq
+          echo "工具安装完成"
+        
+      - name: 创建日志目录
         run: |
-          #!/bin/bash
-          BARK_URL=${{ steps.read_bark_url.outputs.bark_url }}  # 获取输出的 Bark URL
-          # Read the configuration file and process each line
-          while IFS='=' read -r name token; do
-            echo "Key: $name, Value: $token"
-            echo "正在执行的账户: $name"
-            curl -X POST \
-            -H "Content-Type: application/json" \
-            -H "Authorization:$token" \
-            -d "$REQUEST_BODY" \
-            $URL \
-            -o response.json
+          log_dir="carbon-signin-logs"
+          mkdir -p $log_dir
+          echo "log_dir=$log_dir" >> $GITHUB_ENV
+          echo "日志目录: $log_dir"
+        
+      - name: 处理用户签到
+        id: signin
+        run: |
+          # 使用上海时区
+          export TZ='Asia/Shanghai'
           
-            echo "Response:"
-            cat response.json
-            # 检查响应内容
-            if grep -q "token校验失败" response.json; then
-              echo "$name token校验失败"
-              # 发送Bark通知
-              curl -X POST -H 'Content-Type: application/json' -d "{\"title\":\"碳账户Token失效通知\",\"body\":\"$name token校验失败\",\"group\":\"碳账户通知\"}" "$BARK_URL"
-            else
-              echo "$name Token 可用"
-              #curl -X POST -H 'Content-Type: application/json' -d "{\"title\":\"碳账户操作成功通知\",\"body\":\"$name token校验成功\",\"group\":\"碳账户通知\"}" "$BARK_URL"
+          # 准备日志文件
+          report_file="carbon-signin-report.json"
+          echo "[]" > $report_file
+          
+          # 创建原始响应目录
+          raw_dir="$log_dir/raw-responses"
+          mkdir -p $raw_dir
+          
+          # 处理每个用户
+          jq -r 'keys[]' user-configs.json | while read -r user; do
+            echo "▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄"
+            echo "🔄 处理用户: $user"
+            
+            # 提取用户配置
+            token=$(jq -r ".$user.appToken" user-configs.json)
+            bark_url=$(jq -r ".$user.barkUrl" user-configs.json)
+            
+            # 检查token是否为空
+            if [ -z "$token" ] || [ "$token" = "null" ]; then
+              echo "⚠️ 警告: $user 的appToken为空或未设置"
+              # 记录状态信息（上海时间）
+              timestamp=$(date +'%Y-%m-%dT%H:%M:%S%z')
+              status_data="{\"user\":\"$user\",\"timestamp\":\"$timestamp\",\"status\":\"error\",\"message\":\"appToken未设置\"}"
+              jq --argjson data "$status_data" '. += [$data]' $report_file > temp.json && mv temp.json $report_file
+              continue
             fi
-
-          done < config.properties
-      - name: Log response status
+            
+            # 创建原始响应文件路径（带时间戳）
+            raw_file="$raw_dir/${user}_$(date +'%Y%m%d_%H%M%S')_response.json"
+            
+            # 执行签到请求并记录完整响应
+            echo "🔍 请求详情:"
+            echo "  URL: $API_URL"
+            echo "  Token: $token"
+            echo "  Body: $REQUEST_BODY"
+            
+            response=$(curl -s -L -w "\nHTTP_CODE:%{http_code}" -X POST \
+              -H "Content-Type: application/json" \
+              -H "Authorization: $token" \
+              -d "$REQUEST_BODY" \
+              $API_URL | tee "$raw_file")
+              
+            http_code=${response##*HTTP_CODE:}
+            json_content=${response%HTTP_CODE:*}
+            
+            # 保存原始响应
+            echo "原始响应已保存至: $raw_file"
+            echo "📡 原始响应内容:"
+            echo "------------------------"
+            cat "$raw_file"
+            echo "------------------------"
+            
+            # 改进响应解析逻辑
+            token_invalid=false
+            if grep -q "token校验失败" "$raw_file" || 
+               grep -q "\"code\":600" "$raw_file" || 
+               grep -q "\"code\": 600" "$raw_file"; then
+              token_invalid=true
+            fi
+            
+            # 解析API响应
+            code=$(echo $json_content | jq -r '.code? // empty' 2>/dev/null || echo "解析失败")
+            msg=$(echo $json_content | jq -r '.msg? // empty' 2>/dev/null || echo "解析失败")
+            
+            # 记录状态信息（上海时间）
+            timestamp=$(date +'%Y-%m-%dT%H:%M:%S%z')
+            status_data="{\"user\":\"$user\",\"timestamp\":\"$timestamp\",\"httpStatus\":$http_code,\"apiCode\":\"$code\",\"apiMsg\":\"$msg\",\"tokenInvalid\":$token_invalid,\"rawFile\":\"$raw_file\"}"
+            jq --argjson data "$status_data" '. += [$data]' $report_file > temp.json && mv temp.json $report_file
+            
+            # 检查token是否失效
+            if $token_invalid; then
+              echo "❌ 检测到Token失效: $user"
+              
+              # 发送个人通知
+              if [[ -n "$bark_url" && "$bark_url" != "null" ]]; then
+                echo "📤 发送Bark通知到: $user"
+                curl -s -X POST \
+                  -H 'Content-Type: application/json' \
+                  -d "{\"title\":\"碳账户Token失效\",\"body\":\"$user 的Token已失效，请及时更新！\"}" \
+                  "$bark_url"
+              else
+                echo "⚠️ 未找到$user的Bark URL，跳过通知"
+              fi
+            else
+              echo "✅ 签到成功: $user"
+            fi
+            echo ""
+          done
+          
+          # 将最终报告移动到日志目录
+          mv $report_file $log_dir/
+        
+      - name: 显示执行摘要
         run: |
-          RESPONSE_STATUS=$(jq -r '.status' response.json)
-          echo -e "Response Status: $RESPONSE_STATUS \n"
+          echo "================================="
+          echo "📊 用户签到执行摘要"
+          echo "---------------------------------"
+          jq -r '.[] | "用户: \(.user), 状态: \(if .tokenInvalid then "失败" else "成功" end), 时间: \(.timestamp), 原始文件: \(.rawFile)"' $log_dir/carbon-signin-report.json
+          echo "================================="
+        
+      - name: 保存日志到仓库
+        run: |
+          # 设置提交者身份
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@users.noreply.github.com"
+          
+          # 添加日志文件
+          git add $log_dir/*
+          
+          # 检查是否有文件要提交
+          if git diff --cached --quiet; then
+            echo "🟢 没有日志变更需要提交"
+          else
+            echo "📝 提交日志文件"
+            git commit -m "添加碳账户签到日志 - $(date +'%Y%m%d_%H%M%S')"
+            
+            # 关键修复：显示推送时使用的远程URL
+            echo "远程仓库URL: $(git config --get remote.origin.url)"
+            
+            # 安全推送，避免暴露令牌
+            git push origin HEAD:${{ github.ref_name }}
+          fi
+        
+      - name: 上传日志作为Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: carbon-signin-logs
+          path: ${{ env.log_dir }}/
