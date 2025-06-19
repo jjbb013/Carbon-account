@@ -1,0 +1,31 @@
+# .github/workflows/deploy.yml
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
+        with:
+          # 静态资源目录（根据实际项目结构调整）
+          static_site_generator: "none"
+          
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v2
+        with:
+          path: ./public  # 包含index.html的目录
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v2
+        env:
+          # 通过Fine-grained token获取更高安全性[8](@ref)
+          GH_TOKEN: ${{ secrets.GH_PAGES_DEPLOY_TOKEN }}
