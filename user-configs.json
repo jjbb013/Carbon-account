@@ -8,5 +8,10 @@
     "appToken": "3333333",
     "barkUrl": "https://baodu.com",
     "updatedAt": "2025-06-19T14:39:13.074Z"
+  },
+  "baidu": {
+    "appToken": "333333333",
+    "barkUrl": "https://baodu.com",
+    "updatedAt": "2025-06-19T14:39:30.111Z"
   }
 }
