@@ -191,6 +191,62 @@
         .history-item .remove-btn {
             background: var(--error);
         }
+        /* Bark测试按钮样式 */
+        .test-btn {
+            padding: 8px 15px;
+            background: #0969da;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 8px;
+            transition: background-color 0.2s;
+        }
+        .test-btn:hover {
+            background: #0a58ca;
+        }
+        .test-btn:disabled {
+            background: #8c959f;
+            cursor: not-allowed;
+        }
+        .test-result {
+            margin-top: 8px;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .test-success {
+            background-color: #dafbe1;
+            color: #2da44e;
+            border: 1px solid rgba(46, 164, 79, 0.2);
+        }
+        .test-error {
+            background-color: #ffebe9;
+            color: #cf222e;
+            border: 1px solid rgba(207, 34, 46, 0.2);
+        }
+        .test-loading {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        .bark-input-group {
+            display: flex;
+            gap: 10px;
+        }
+        .bark-input-group input {
+            flex: 1;
+        }
+        .bark-input-group button {
+            align-self: flex-start;
+        }
     </style>
 </head>
 <body>
@@ -223,7 +279,11 @@
             
             <div class="form-group">
                 <label for="barkUrl">Bark通知URL</label>
-                <input type="url" id="barkUrl" placeholder="https://api.day.app/xxxxxx">
+                <div class="bark-input-group">
+                    <input type="url" id="barkUrl" placeholder="https://api.day.app/xxxxxx">
+                    <button type="button" id="testBarkBtn" class="test-btn">测试通知</button>
+                </div>
+                <div id="barkTestResult" class="test-result"></div>
                 <p class="instructions">用于接收Token失效通知的设备URL，使用方法请参阅页面下方教程</p>
                 
                 <div class="history-section" id="urlHistorySection" style="display:none;">
@@ -252,6 +312,9 @@
             
             <p><strong>步骤三：</strong> 粘贴URL到表单</p>
             <p>将复制的链接粘贴到上面的"Bark通知URL"输入框</p>
+            
+            <p><strong>步骤四：</strong> 测试通知</p>
+            <p>点击"测试通知"按钮，确认您的设备收到了测试通知后再提交配置</p>
         </div>
         
         <div class="footer">
@@ -362,12 +425,68 @@
             showMessage('URL已填入输入框', 'success', 2000);
         }
         
-        // 初始化页面时渲染历史记录
+        // Bark通知测试函数
+        async function testBarkNotification() {
+            const barkUrl = document.getElementById('barkUrl').value.trim();
+            const testBtn = document.getElementById('testBarkBtn');
+            const testResult = document.getElementById('barkTestResult');
+            
+            if (!barkUrl) {
+                showMessage('请输入Bark URL进行测试', 'error');
+                return;
+            }
+            
+            // 验证URL格式
+            if (!barkUrl.startsWith('https://api.day.app/')) {
+                testResult.textContent = '❌ URL格式不正确，应以 https://api.day.app/ 开头';
+                testResult.className = 'test-result test-error';
+                return;
+            }
+            
+            // 禁用按钮并显示加载状态
+            testBtn.disabled = true;
+            testBtn.innerHTML = '<span class="test-loading"></span>测试中...';
+            testResult.textContent = '';
+            
+            try {
+                // 发送测试通知
+                const testUrl = `${barkUrl}/碳账户测试/这是一条测试通知?group=碳账户测试`;
+                const response = await fetch(testUrl);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.code === 200) {
+                        testResult.innerHTML = '✅ 测试通知已发送，请检查您的设备';
+                        testResult.className = 'test-result test-success';
+                    } else {
+                        testResult.innerHTML = `❌ 发送失败: ${data.message || '未知错误'}`;
+                        testResult.className = 'test-result test-error';
+                    }
+                } else {
+                    testResult.innerHTML = `❌ 请求失败: ${response.status} ${response.statusText}`;
+                    testResult.className = 'test-result test-error';
+                }
+            } catch (error) {
+                testResult.innerHTML = `❌ 请求异常: ${error.message}`;
+                testResult.className = 'test-result test-error';
+            } finally {
+                // 恢复按钮状态
+                setTimeout(() => {
+                    testBtn.disabled = false;
+                    testBtn.textContent = '测试通知';
+                }, 2000);
+            }
+        }
+        
+        // 初始化页面时渲染历史记录并设置测试按钮
         window.addEventListener('DOMContentLoaded', () => {
             renderBarkHistory();
             
             // 尝试加载用户的Bark配置
             document.getElementById('username').addEventListener('blur', loadBarkConfig);
+            
+            // 设置测试按钮事件
+            document.getElementById('testBarkBtn').addEventListener('click', testBarkNotification);
         });
         
         // 尝试加载用户的Bark配置
