@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="通过此页面安全提交碳账户配置到GitHub仓库">
-    <title>碳账户配置提交 - GitHub方案2</title>
+    <title>GitHub碳账户配置管理</title>
     <style>
         :root {
             --primary: #238636;
@@ -12,27 +11,53 @@
             --warning: #e36209;
             --success: #2c974b;
             --gray: #f6f8fa;
+            --dark: #24292f;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
             line-height: 1.6;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
             color: #333;
             background-color: var(--gray);
+            padding: 20px;
         }
         .container {
+            max-width: 800px;
+            margin: 0 auto;
             background-color: white;
-            padding: 25px;
             border-radius: 10px;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 3px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
         }
-        h1 {
-            color: var(--primary);
+        header {
+            background-color: var(--dark);
+            color: white;
+            padding: 25px;
             text-align: center;
-            margin-bottom: 20px;
+        }
+        header h1 {
             font-size: 1.8rem;
+            margin-bottom: 5px;
+            color: white;
+        }
+        .section {
+            padding: 25px;
+            border-bottom: 1px solid #e1e4e8;
+        }
+        .token-display {
+            background-color: #fff9db;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 1rem;
+            word-break: break-all;
+            margin-bottom: 20px;
+            border: 1px solid #ffd43b;
+            text-align: center;
         }
         .warning-box {
             background-color: #fff8e6;
@@ -44,26 +69,35 @@
         .warning-box p {
             margin: 5px 0;
         }
+        .form-title {
+            color: var(--dark);
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+        }
         form {
-            display: flex;
-            flex-direction: column;
+            display: grid;
+            grid-template-columns: 1fr;
             gap: 20px;
         }
+        @media (min-width: 600px) {
+            form {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
         .form-group {
-            margin-bottom: 10px;
+            margin-bottom: 15px;
         }
         label {
-            font-weight: 600;
             display: block;
+            font-weight: 600;
             margin-bottom: 8px;
-            color: #444;
+            color: var(--dark);
         }
         input {
             padding: 12px;
             border: 1px solid #d1d5da;
             border-radius: 6px;
             width: 100%;
-            box-sizing: border-box;
             font-size: 16px;
         }
         input:focus {
@@ -81,10 +115,21 @@
             transition: background-color 0.2s, transform 0.1s;
             border: none;
             border-radius: 6px;
-            margin-top: 10px;
+            width: 100%;
         }
         button:hover {
             background: #2ea043;
+        }
+        button.delete {
+            background: transparent;
+            color: var(--error);
+            border: 1px solid var(--error);
+            padding: 5px 12px;
+            font-size: 14px;
+            font-weight: normal;
+        }
+        button.delete:hover {
+            background: #fff1f0;
         }
         button:active {
             transform: translateY(1px);
@@ -97,16 +142,17 @@
             margin-top: 20px;
             padding: 15px;
             border-radius: 6px;
+            display: none;
         }
         .success {
-            color: var(--success);
             background-color: #f0fff4;
             border: 1px solid rgba(44, 151, 75, 0.3);
+            color: var(--success);
         }
         .error {
-            color: var(--error);
             background-color: #fff1f0;
             border: 1px solid rgba(215, 58, 73, 0.3);
+            color: var(--error);
         }
         .loading {
             display: inline-block;
@@ -122,14 +168,53 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+        .user-list {
+            margin-top: 25px;
+        }
+        .user-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #eaecef;
+        }
+        .user-item:last-child {
+            border-bottom: none;
+        }
+        .user-info {
+            flex: 1;
+        }
+        .user-actions {
+            margin-left: 15px;
+        }
+        .user-item:hover {
+            background-color: #f6f8fa;
+        }
         .instructions {
             font-size: 0.9rem;
             color: #666;
             margin-top: 8px;
         }
-        .footer {
+        .no-users {
             text-align: center;
-            margin-top: 30px;
+            color: #666;
+            padding: 30px;
+            font-style: italic;
+        }
+        .data-display {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        footer {
+            text-align: center;
+            padding: 20px;
             color: #666;
             font-size: 0.85rem;
         }
@@ -137,58 +222,215 @@
 </head>
 <body>
     <div class="container">
-        <h1>碳账户配置提交</h1>
+        <header>
+            <h1>GitHub碳账户配置管理</h1>
+            <p>基于GitHub API的配置管理界面</p>
+        </header>
         
-        <div class="warning-box">
-            <p><strong>重要提示：</strong>您需要创建GitHub Token以提交配置</p>
-            <p>1. 访问 <a href="https://github.com/settings/tokens" target="_blank">GitHub Tokens</a></p>
-            <p>2. 创建具有<strong>repo</strong>权限的Token</p>
-            <p>3. 复制Token并粘贴到下方</p>
+        <div class="section">
+            <h2 class="form-title">Github Token</h2>
+            <div class="token-display">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</div>
+            <p class="instructions">此Token用于访问GitHub API管理配置信息，请妥善保管。</p>
         </div>
         
-        <form id="configForm">
-            <div class="form-group">
-                <label for="ghToken">您的GitHub Token (必需)</label>
-                <input type="password" id="ghToken" required placeholder="ghp_xxxxxxxx" autocomplete="off">
-                <p class="instructions">Token需要repo权限才能更新配置</p>
+        <div class="section">
+            <h2 class="form-title">添加新配置</h2>
+            
+            <div class="warning-box">
+                <p><strong>注意：</strong>用户名必须是唯一标识符（只允许字母、数字和下划线）</p>
             </div>
             
-            <div class="form-group">
-                <label for="username">用户名（唯一标识）</label>
-                <input type="text" id="username" required placeholder="my_app_user">
-            </div>
+            <form id="configForm">
+                <div class="form-group">
+                    <label for="username">用户名（唯一标识）</label>
+                    <input type="text" id="username" required placeholder="example_user">
+                </div>
+                
+                <div class="form-group">
+                    <label for="appToken">应用Token</label>
+                    <input type="text" id="appToken" required placeholder="用于API请求的凭证">
+                </div>
+                
+                <div class="form-group">
+                    <label for="barkUrl">Bark通知URL</label>
+                    <input type="url" id="barkUrl" placeholder="https://api.day.app/xxxxxx">
+                </div>
+                
+                <div class="form-group">
+                    <button type="submit" id="submitBtn">
+                        <span id="submitText">提交配置</span>
+                    </button>
+                </div>
+            </form>
             
-            <div class="form-group">
-                <label for="appToken">应用Token</label>
-                <input type="password" id="appToken" required placeholder="用于定时任务的凭证">
-            </div>
-            
-            <div class="form-group">
-                <label for="barkUrl">Bark通知URL（可选）</label>
-                <input type="url" id="barkUrl" placeholder="https://api.day.app/xxxxxx">
-                <p class="instructions">用于接收通知的设备URL</p>
-            </div>
-            
-            <button type="submit" id="submitBtn">
-                <span id="submitText">提交配置</span>
-            </button>
-        </form>
-        
-        <div id="message"></div>
-        
-        <div class="footer">
-            <p>此工具免费运行于GitHub平台 | 配置存储于仓库 <a href="https://github.com/jjbb013/Carbon-account">Carbon-account</a></p>
+            <div id="formMessage" class="message"></div>
         </div>
+        
+        <div class="section">
+            <h2 class="form-title">现有配置</h2>
+            
+            <div class="user-list" id="userList">
+                <div class="no-users" id="noUsersMessage">正在加载配置数据...</div>
+                <!-- 用户列表会动态加载在这里 -->
+            </div>
+            
+            <div id="userMessage" class="message"></div>
+        </div>
+        
+        <footer>
+            <p>GitHub碳账户配置管理 | 基于GitHub API实现 | 数据存储在 <a href="https://github.com/jjbb013/Carbon-account">Carbon-account</a> 仓库</p>
+        </footer>
     </div>
 
     <script>
-        // 显示消息的函数
-        function showMessage(text, type = 'info', duration = 5000) {
-            const messageEl = document.getElementById('message');
-            messageEl.innerHTML = `<div class="message ${type}">${text}</div>`;
+        // 配置GitHub存储信息
+        const REPO_OWNER = "jjbb013";
+        const REPO_NAME = "Carbon-account";
+        const CONFIG_FILE = "user-configs.json";
+        const GITHUB_TOKEN = "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";
+        
+        // DOM元素
+        const formMessage = document.getElementById('formMessage');
+        const userMessage = document.getElementById('userMessage');
+        const userList = document.getElementById('userList');
+        const noUsersMessage = document.getElementById('noUsersMessage');
+        
+        // 页面加载时获取配置
+        document.addEventListener('DOMContentLoaded', () => {
+            loadConfig();
+        });
+        
+        // 显示消息函数
+        function showMessage(element, text, type = 'info', duration = 5000) {
+            element.textContent = text;
+            element.className = `message ${type}`;
+            element.style.display = 'block';
             
             if (type === 'success' && duration > 0) {
-                setTimeout(() => messageEl.innerHTML = '', duration);
+                setTimeout(() => {
+                    element.style.display = 'none';
+                }, duration);
+            }
+        }
+        
+        // 加载配置并显示用户列表
+        async function loadConfig() {
+            noUsersMessage.textContent = "正在加载用户配置...";
+            userList.innerHTML = '';
+            
+            try {
+                const configUrl = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${CONFIG_FILE}`;
+                
+                const response = await fetch(configUrl, {
+                    headers: { 
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Authorization': `token ${GITHUB_TOKEN}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        noUsersMessage.textContent = "尚未存储任何用户配置";
+                        return;
+                    }
+                    throw new Error(`加载配置失败: ${response.status} ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                const config = JSON.parse(atob(data.content.replace(/\s/g, '')));
+                
+                if (Object.keys(config).length === 0) {
+                    noUsersMessage.textContent = "尚未存储任何用户配置";
+                    return;
+                }
+                
+                userList.innerHTML = '';
+                noUsersMessage.style.display = 'none';
+                
+                for (const username in config) {
+                    const user = config[username];
+                    const userItem = document.createElement('div');
+                    userItem.className = 'user-item';
+                    userItem.innerHTML = `
+                        <div class="user-info">
+                            <div><strong>用户名:</strong> ${username}</div>
+                            <div class="instructions">创建于: ${new Date(user.updatedAt).toLocaleString()}</div>
+                        </div>
+                        <div class="user-actions">
+                            <button class="delete" data-username="${username}">删除</button>
+                        </div>
+                    `;
+                    userList.appendChild(userItem);
+                }
+                
+                // 添加删除按钮事件
+                document.querySelectorAll('.user-actions button').forEach(button => {
+                    button.addEventListener('click', () => {
+                        const username = button.getAttribute('data-username');
+                        deleteUser(username);
+                    });
+                });
+                
+            } catch (error) {
+                noUsersMessage.textContent = "加载配置失败: " + error.message;
+                console.error('配置加载错误:', error);
+            }
+        }
+        
+        // 删除用户
+        async function deleteUser(username) {
+            if (!confirm(`确定要删除用户 "${username}" 的配置吗？`)) return;
+            
+            try {
+                // 获取当前配置
+                const configUrl = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${CONFIG_FILE}`;
+                const response = await fetch(configUrl, {
+                    headers: { 
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Authorization': `token ${GITHUB_TOKEN}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`加载配置失败: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                const config = JSON.parse(atob(data.content.replace(/\s/g, '')));
+                
+                // 删除指定用户
+                if (!config[username]) {
+                    throw new Error(`未找到用户: ${username}`);
+                }
+                
+                delete config[username];
+                
+                // 更新配置文件
+                const updateResponse = await fetch(configUrl, {
+                    method: 'PUT',
+                    headers: {
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Authorization': `token ${GITHUB_TOKEN}`
+                    },
+                    body: JSON.stringify({
+                        message: `删除用户: ${username}`,
+                        content: btoa(JSON.stringify(config, null, 2)),
+                        sha: data.sha
+                    })
+                });
+                
+                if (!updateResponse.ok) {
+                    const errorData = await updateResponse.json();
+                    throw new Error(`保存失败: ${errorData.message || '未知错误'}`);
+                }
+                
+                // 刷新用户列表
+                loadConfig();
+                showMessage(userMessage, `成功删除用户: ${username}`, 'success');
+                
+            } catch (error) {
+                showMessage(userMessage, `删除失败: ${error.message}`, 'error');
+                console.error('删除用户错误:', error);
             }
         }
         
@@ -197,46 +439,39 @@
             e.preventDefault();
             
             // 获取输入值
-            const userToken = document.getElementById('ghToken').value.trim();
             const username = document.getElementById('username').value.trim();
             const appToken = document.getElementById('appToken').value.trim();
             const barkUrl = document.getElementById('barkUrl').value.trim();
             
-            // 禁用按钮并显示加载状态
+            // 验证输入
+            if (!username || !appToken) {
+                showMessage(formMessage, '用户名和应用Token是必填项', 'error');
+                return;
+            }
+            
+            // 验证用户名格式
+            if (!/^[a-zA-Z0-9_-]+$/.test(username)) {
+                showMessage(formMessage, '用户名只能包含字母、数字、下划线和连字符', 'error');
+                return;
+            }
+            
+            // UI状态更新
             const submitBtn = document.getElementById('submitBtn');
             const submitText = document.getElementById('submitText');
             submitBtn.disabled = true;
             submitText.innerHTML = `<span class="loading"></span>提交中...`;
             
-            // 验证输入
-            if (!userToken || !username || !appToken) {
-                showMessage('请填写所有必需字段', 'error');
-                submitBtn.disabled = false;
-                submitText.textContent = '提交配置';
-                return;
-            }
-            
             try {
-                // GitHub仓库信息
-                const repoOwner = "jjbb013";
-                const repoName = "Carbon-account";
-                const configFile = "user-configs.json";
-                const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${configFile}`;
-                
-                // 步骤1: 获取现有配置
-                let response = await fetch(apiUrl, {
+                // 1. 获取现有配置
+                const configUrl = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${CONFIG_FILE}`;
+                const response = await fetch(configUrl, {
                     headers: { 
                         'Accept': 'application/vnd.github.v3+json',
-                        'Authorization': `token ${userToken}`
+                        'Authorization': `token ${GITHUB_TOKEN}`
                     }
                 });
                 
-                // 处理认证错误
-                if (response.status === 401) {
-                    throw new Error('GitHub Token无效或权限不足 - 请检查Token权限');
-                }
-                
-                // 加载现有配置
+                // 处理配置加载
                 let config = {};
                 let sha = null;
                 
@@ -244,27 +479,31 @@
                     const data = await response.json();
                     config = JSON.parse(atob(data.content.replace(/\s/g, '')));
                     sha = data.sha;
-                    showMessage('已加载现有配置', 'success');
                 } else if (response.status !== 404) {
-                    throw new Error(`加载配置失败: ${response.status} ${response.statusText}`);
+                    throw new Error(`加载配置失败: ${response.status}`);
                 }
                 
-                // 步骤2: 更新配置
+                // 2. 检查用户名是否已存在
+                if (config[username]) {
+                    throw new Error(`用户名 "${username}" 已存在`);
+                }
+                
+                // 3. 更新配置
                 config[username] = { 
                     appToken: appToken,
                     barkUrl: barkUrl || null,
                     updatedAt: new Date().toISOString()
                 };
                 
-                // 步骤3: 保存到GitHub
-                const updateResponse = await fetch(apiUrl, {
+                // 4. 保存到GitHub
+                const updateResponse = await fetch(configUrl, {
                     method: 'PUT',
                     headers: {
                         'Accept': 'application/vnd.github.v3+json',
-                        'Authorization': `token ${userToken}`
+                        'Authorization': `token ${GITHUB_TOKEN}`
                     },
                     body: JSON.stringify({
-                        message: `更新配置: ${username}`,
+                        message: `添加用户: ${username}`,
                         content: btoa(JSON.stringify(config, null, 2)),
                         sha: sha
                     })
@@ -275,25 +514,19 @@
                     throw new Error(`保存失败: ${errorData.message || '未知错误'}`);
                 }
                 
-                // 成功处理
-                showMessage(`配置保存成功！用户名: ${username}`, 'success');
+                // 5. 成功处理
+                showMessage(formMessage, `配置保存成功! 用户名: ${username}`, 'success');
                 
-                // 清空敏感字段
-                document.getElementById('ghToken').value = '';
+                // 6. 刷新用户列表
+                loadConfig();
+                
+                // 7. 清空表单
+                document.getElementById('username').value = '';
                 document.getElementById('appToken').value = '';
+                document.getElementById('barkUrl').value = '';
                 
             } catch (error) {
-                console.error(error);
-                let errorMsg = error.message;
-                
-                // 特殊错误处理
-                if (errorMsg.includes('401')) {
-                    errorMsg = 'GitHub Token无效或权限不足 - 请确认Token有repo权限';
-                } else if (errorMsg.includes('404')) {
-                    errorMsg = '配置文件未找到 - 首次提交可能需要重试';
-                }
-                
-                showMessage(`错误: ${errorMsg}`, 'error', 8000);
+                showMessage(formMessage, `提交失败: ${error.message}`, 'error');
                 
             } finally {
                 // 重新启用提交按钮
