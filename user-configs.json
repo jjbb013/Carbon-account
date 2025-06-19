@@ -1,17 +1,17 @@
 {
-  "123131": {
+  "apple": {
     "appToken": "hjashdjfhasdjf",
-    "barkUrl": "http://baidu.com",
+    "barkUrl": "https://api.day.app/xxxxxx",
     "updatedAt": "2025-06-19T13:57:41.500Z"
   },
   "will": {
-    "appToken": "3333333",
-    "barkUrl": "https://baodu.com",
+    "appToken": "lkdkksdffdsdss",
+    "barkUrl": "https://api.day.app/xxxxxx",
     "updatedAt": "2025-06-19T14:39:13.074Z"
   },
-  "baidu": {
-    "appToken": "55555555",
-    "barkUrl": "https://baod3u.com",
+  "peter": {
+    "appToken": "yuyiuweyuiyuwer",
+    "barkUrl": "https://api.day.app/xxxxxx",
     "updatedAt": "2025-06-19T14:40:01.467Z"
   }
 }
