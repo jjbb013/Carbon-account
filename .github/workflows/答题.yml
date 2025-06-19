@@ -46,19 +46,20 @@ jobs:
             fi
             
             # 执行答题请求
-            #echo "🔍 请求详情:"
-            #echo "  URL: $API_URL"
-            #echo "  Token: $token"
-            #echo "  Body: $REQUEST_BODY"
+            echo "🔍 请求详情:"
+            echo "  URL: $API_URL"
+            echo "  Token: $token"
+            echo "  Body: $REQUEST_BODY"
             
-            curl -s -X POST \
+            # 使用 -w 添加响应后换行
+            curl -s -w "\n" -X POST \
               -H "Content-Type: application/json" \
               -H "Authorization: $token" \
               -d "$REQUEST_BODY" \
               $API_URL
-              
-            # 添加5秒延迟避免请求过密
-            sleep 5
+            
+            # 再添加一个空行使格式更清晰
+            echo
           }
           
           # 第一轮答题
@@ -68,6 +69,7 @@ jobs:
           done < <(jq -r 'to_entries[] | "\(.key)=\(.value.appToken)"' user-configs.json)
           
           # 等待10秒后进行第二轮
+          echo -e "\n🕒 等待10秒后进行第二轮答题...\n"
           sleep 10
           
           # 第二轮答题
@@ -75,3 +77,6 @@ jobs:
           while IFS='=' read -r user token; do
             execute_questions_for_user "$user" "$token"
           done < <(jq -r 'to_entries[] | "\(.key)=\(.value.appToken)"' user-configs.json)
+          
+          # 任务结束
+          echo -e "\n🏁 答题任务已完成"
