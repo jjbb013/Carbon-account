@@ -24,7 +24,7 @@ jobs:
               console.error('❌ 触发签到任务失败:', error.message);
               core.setFailed('签到任务触发失败');
             }
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.GH_TOKEN }}
       
       # 第二步：执行答题骑车回收任务（签到后）
       - name: 触发答题骑车回收任务
