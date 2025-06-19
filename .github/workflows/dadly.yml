@@ -8,6 +8,9 @@ on:
 jobs:
   carbon-signin:
     runs-on: ubuntu-latest
+    # 关键修复：添加推送所需的权限
+    permissions:
+      contents: write  # 允许写入仓库内容
     env:
       API_URL: https://carbon-account-server.carbonstop.net/task/complete
       REQUEST_BODY: '{"value":1,"sceneCode":"MRCJ0002","signMessage":"2c2b34840b8ec9fb735e1b2bed8533fa"}'
@@ -17,7 +20,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0  # 获取完整历史记录以便推送日志
-          persist-credentials: true  # 保存凭证用于后续推送
+          token: ${{ secrets.GH_TOKEN }}  # 使用具有写权限的令牌
         
       - name: 安装必要工具
         run: |
@@ -152,7 +155,12 @@ jobs:
           else
             echo "📝 提交日志文件"
             git commit -m "添加碳账户签到日志 - $(date +'%Y%m%d_%H%M%S')"
-            git push
+            
+            # 关键修复：显示推送时使用的远程URL
+            echo "远程仓库URL: $(git config --get remote.origin.url)"
+            
+            # 安全推送，避免暴露令牌
+            git push origin HEAD:${{ github.ref_name }}
           fi
         
       - name: 上传日志作为Artifact
