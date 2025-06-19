@@ -1,0 +1,29 @@
+[
+  {
+    "user": "apple",
+    "timestamp": "2025-06-19T23:51:03+0800",
+    "httpStatus": 200,
+    "apiCode": "600",
+    "apiMsg": "token校验失败",
+    "tokenInvalid": true,
+    "rawFile": "carbon-signin-logs/raw-responses/apple_20250619_235101_response.json"
+  },
+  {
+    "user": "peter",
+    "timestamp": "2025-06-19T23:51:05+0800",
+    "httpStatus": 200,
+    "apiCode": "600",
+    "apiMsg": "token校验失败",
+    "tokenInvalid": true,
+    "rawFile": "carbon-signin-logs/raw-responses/peter_20250619_235104_response.json"
+  },
+  {
+    "user": "will",
+    "timestamp": "2025-06-19T23:51:08+0800",
+    "httpStatus": 200,
+    "apiCode": "600",
+    "apiMsg": "token校验失败",
+    "tokenInvalid": true,
+    "rawFile": "carbon-signin-logs/raw-responses/will_20250619_235106_response.json"
+  }
+]
