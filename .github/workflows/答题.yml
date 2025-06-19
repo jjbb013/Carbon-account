@@ -47,9 +47,9 @@ jobs:
             
             # 执行答题请求
             echo "🔍 请求详情:"
-            echo "  URL: $API_URL"
-            echo "  Token: $token"
-            echo "  Body: $REQUEST_BODY"
+            #echo "  URL: $API_URL"
+            #echo "  Token: $token"
+            #echo "  Body: $REQUEST_BODY"
             
             # 使用 -w 添加响应后换行
             curl -s -w "\n" -X POST \
