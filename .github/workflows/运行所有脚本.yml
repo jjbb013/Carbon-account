@@ -44,7 +44,7 @@ jobs:
               console.error('❌ 触发答题骑车回收任务失败:', error.message);
               core.setFailed('答题骑车回收任务触发失败');
             }
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.GH_TOKEN }}
       
       # 第三步：执行爬楼任务（最后）
       - name: 触发爬楼任务
@@ -64,7 +64,7 @@ jobs:
               console.error('❌ 触发爬楼任务失败:', error.message);
               core.setFailed('爬楼任务触发失败');
             }
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.GH_TOKEN }}
       
       # 最终步骤：显示完成信息
       - name: 完成提示
