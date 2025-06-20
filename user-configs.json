@@ -13,5 +13,10 @@
     "appToken": "eyJhbGciOiJIUzUxMiJ9.eyJjb21wYW55X2lkIjoxMDAwMDAwNzQyNzkwMTYyLCJ1c2VyX2lkIjozOTQzODYsInVzZXJfa2V5IjoiMTAwMDAwMDc0Mjc5MDE2MjpvRmJBZDVKODRPelczMWVVQkl5NjA2M3lDRlZrOjk2Mzc5ODU5LTQ2NjEtNDA3Yi1iOWIxLTQ3YWFlNjIxODg5YiIsInVzZXJuYW1lIjoib0ZiQWQ1Sjg0T3pXMzFlVUJJeTYwNjN5Q0ZWayJ9.jqPOSBqVmeAwkpSRNQuAXLyjKGivh3UatzPhpc7oel1fO4EpYQw3rKsYuiY1balmIwlK7V-3gzKmjwCoVKySKw",
     "barkUrl": "https://api.day.app/6y4y9Y5Ze4uAgiVuGgWtp7",
     "updatedAt": "2025-06-20T02:16:05.003Z"
+  },
+  "Dan": {
+    "appToken": "eyJhbGciOiJIUzUxMiJ9.eyJjb21wYW55X2lkIjoxMDAwMDAwNzQyNzkwMTYyLCJ1c2VyX2lkIjozOTQzNjAsInVzZXJfa2V5IjoiMTAwMDAwMDc0Mjc5MDE2MjpvRmJBZDVQWHJwMlFiMkRBMU5NSzdhUFhhcHZrOjY1YzhlY2RiLTNhYzUtNDQyYy05M2I1LWRlNzYzZmZiNjZiZiIsInVzZXJuYW1lIjoib0ZiQWQ1UFhycDJRYjJEQTFOTUs3YVBYYXB2ayJ9.kbKrqK1OWTlfxPkNltL8afatbeqyy8m__cWZe88kK6xEl3OVsQQ2ltym3fkRtmes7xs2zBRpb9rNvOfA-9lYlg",
+    "barkUrl": "https://api.day.app/A5TccStoSr8dsFt5kMocBK",
+    "updatedAt": "2025-06-20T02:16:57.489Z"
   }
 }
