@@ -1,20 +1,56 @@
 [
   {
-    "user": "LongAoTian",
-    "timestamp": "2025-06-20T01:03:29+0800",
+    "user": "Dan",
+    "timestamp": "2025-06-20T10:34:44+0800",
     "httpStatus": 200,
-    "apiCode": "600",
-    "apiMsg": "token校验失败",
-    "tokenInvalid": true,
-    "rawFile": "carbon-signin-logs/raw-responses/LongAoTian_20250620_010325_response.json"
+    "apiCode": "200",
+    "apiMsg": "OK",
+    "tokenInvalid": false,
+    "rawFile": "carbon-signin-logs/raw-responses/Dan_20250620_103442_response.json"
   },
   {
-    "user": "Will",
-    "timestamp": "2025-06-20T01:03:32+0800",
+    "user": "Daozhu",
+    "timestamp": "2025-06-20T10:34:45+0800",
     "httpStatus": 200,
     "apiCode": "500",
     "apiMsg": "本日已完成",
     "tokenInvalid": false,
-    "rawFile": "carbon-signin-logs/raw-responses/Will_20250620_010330_response.json"
+    "rawFile": "carbon-signin-logs/raw-responses/Daozhu_20250620_103444_response.json"
+  },
+  {
+    "user": "LongAoTian",
+    "timestamp": "2025-06-20T10:34:47+0800",
+    "httpStatus": 200,
+    "apiCode": "600",
+    "apiMsg": "token校验失败",
+    "tokenInvalid": true,
+    "rawFile": "carbon-signin-logs/raw-responses/LongAoTian_20250620_103445_response.json"
+  },
+  {
+    "user": "MarsWang",
+    "timestamp": "2025-06-20T10:34:49+0800",
+    "httpStatus": 200,
+    "apiCode": "500",
+    "apiMsg": "本日已完成",
+    "tokenInvalid": false,
+    "rawFile": "carbon-signin-logs/raw-responses/MarsWang_20250620_103448_response.json"
+  },
+  {
+    "user": "Will",
+    "timestamp": "2025-06-20T10:34:51+0800",
+    "httpStatus": 200,
+    "apiCode": "500",
+    "apiMsg": "本日已完成",
+    "tokenInvalid": false,
+    "rawFile": "carbon-signin-logs/raw-responses/Will_20250620_103449_response.json"
+  },
+  {
+    "user": "ZENG",
+    "timestamp": "2025-06-20T10:34:52+0800",
+    "httpStatus": 200,
+    "apiCode": "500",
+    "apiMsg": "本日已完成",
+    "tokenInvalid": false,
+    "rawFile": "carbon-signin-logs/raw-responses/ZENG_20250620_103451_response.json"
   }
 ]
