@@ -8,10 +8,5 @@
     "appToken": "eyJhbGciOiJIUzUxMiJ9.eyJjb21wYW55X2lkIjoxMDAwMDAwNzQyNzkwMTYyLCJ1c2VyX2lkIjozOTc2OTcsInVzZXJfa2V5IjoiMTAwMDAwMDc0Mjc5MDE2MjpvRmJBZDVPWHJ5bHVHSWRxVFhvT0FIaU84QTZ3OjRlMTNmNzk3LTk1ODMtNGJkYS05NGIwLTgwODMxNjNkYjE0ZCIsInVzZXJuYW1lIjoib0ZiQWQ1T1hyeWx1R0lkcVRYb09BSGlPOEE2dyJ9",
     "barkUrl": "https://api.day.app/oZaeqGLJzRLSxW7dJqeACn",
     "updatedAt": "2025-06-19T17:39:36.493Z"
-  },
-  "Klaus": {
-    "appToken": "magnet:?xt=urn:btih:b89439b33788604212b2e6e08bb58935d937e5f2&dn=[javdb.com]royd-240",
-    "barkUrl": "https://api.day.app/oZaeqGLJzRLSxW7dJqeACn",
-    "updatedAt": "2025-06-20T01:14:41.759Z"
   }
 }
