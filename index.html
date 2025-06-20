@@ -264,17 +264,19 @@
             <div class="form-group">
                 <label for="ghToken">您的GitHub Token (必需)</label>
                 <input type="text" id="ghToken" required placeholder="ghp_xxxxxxxx" autocomplete="off">
-                <p class="instructions">Token需要repo权限才能更新配置</p>
+                <p class="instructions">Token 需要 repo 权限才能更新配置</p>
             </div>
             
             <div class="form-group">
-                <label for="username">用户名（唯一标识）</label>
+                <label for="username">用户名（唯一标识，区分大小写）</label>
                 <input type="text" id="username" required placeholder="用英文字符输入你的昵称">
+                <p class="instructions">用户名请每次更新时和上次填写的保持一致，若忘记可以点击顶部链接查看现有数据列表</p>
             </div>
             
             <div class="form-group">
                 <label for="appToken">应用Token</label>
                 <input type="text" id="appToken" required placeholder="用于定时运行碳账户任务的凭证">
+                <p class="instructions">你可以通过配置 Stream App 在你的 iOS 设备上来获取碳账户的 Token 信息</p>
             </div>
             
             <div class="form-group">
