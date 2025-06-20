@@ -2,7 +2,7 @@ name: 爬楼任务
 
 on:
   schedule:
-    - cron: '15 4 * * 1-5'  # UTC时间4:15，即北京时间12:15
+    - cron: '10 4 * * 1-5'  # UTC时间4:10，即北京时间12:10
   workflow_dispatch:
 
 jobs:
