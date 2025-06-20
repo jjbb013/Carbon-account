@@ -1,56 +1,56 @@
 [
   {
     "user": "Dan",
-    "timestamp": "2025-06-20T10:34:44+0800",
+    "timestamp": "2025-06-20T11:47:42+0800",
+    "httpStatus": 200,
+    "apiCode": "500",
+    "apiMsg": "本日已完成",
+    "tokenInvalid": false,
+    "rawFile": "carbon-signin-logs/raw-responses/Dan_20250620_114740_response.json"
+  },
+  {
+    "user": "Daozhu",
+    "timestamp": "2025-06-20T11:47:43+0800",
+    "httpStatus": 200,
+    "apiCode": "500",
+    "apiMsg": "本日已完成",
+    "tokenInvalid": false,
+    "rawFile": "carbon-signin-logs/raw-responses/Daozhu_20250620_114742_response.json"
+  },
+  {
+    "user": "LongAoTian",
+    "timestamp": "2025-06-20T11:47:45+0800",
     "httpStatus": 200,
     "apiCode": "200",
     "apiMsg": "OK",
     "tokenInvalid": false,
-    "rawFile": "carbon-signin-logs/raw-responses/Dan_20250620_103442_response.json"
-  },
-  {
-    "user": "Daozhu",
-    "timestamp": "2025-06-20T10:34:45+0800",
-    "httpStatus": 200,
-    "apiCode": "500",
-    "apiMsg": "本日已完成",
-    "tokenInvalid": false,
-    "rawFile": "carbon-signin-logs/raw-responses/Daozhu_20250620_103444_response.json"
-  },
-  {
-    "user": "LongAoTian",
-    "timestamp": "2025-06-20T10:34:47+0800",
-    "httpStatus": 200,
-    "apiCode": "600",
-    "apiMsg": "token校验失败",
-    "tokenInvalid": true,
-    "rawFile": "carbon-signin-logs/raw-responses/LongAoTian_20250620_103445_response.json"
+    "rawFile": "carbon-signin-logs/raw-responses/LongAoTian_20250620_114743_response.json"
   },
   {
     "user": "MarsWang",
-    "timestamp": "2025-06-20T10:34:49+0800",
+    "timestamp": "2025-06-20T11:47:46+0800",
     "httpStatus": 200,
     "apiCode": "500",
     "apiMsg": "本日已完成",
     "tokenInvalid": false,
-    "rawFile": "carbon-signin-logs/raw-responses/MarsWang_20250620_103448_response.json"
+    "rawFile": "carbon-signin-logs/raw-responses/MarsWang_20250620_114745_response.json"
   },
   {
     "user": "Will",
-    "timestamp": "2025-06-20T10:34:51+0800",
+    "timestamp": "2025-06-20T11:47:48+0800",
     "httpStatus": 200,
     "apiCode": "500",
     "apiMsg": "本日已完成",
     "tokenInvalid": false,
-    "rawFile": "carbon-signin-logs/raw-responses/Will_20250620_103449_response.json"
+    "rawFile": "carbon-signin-logs/raw-responses/Will_20250620_114746_response.json"
   },
   {
     "user": "ZENG",
-    "timestamp": "2025-06-20T10:34:52+0800",
+    "timestamp": "2025-06-20T11:47:49+0800",
     "httpStatus": 200,
     "apiCode": "500",
     "apiMsg": "本日已完成",
     "tokenInvalid": false,
-    "rawFile": "carbon-signin-logs/raw-responses/ZENG_20250620_103451_response.json"
+    "rawFile": "carbon-signin-logs/raw-responses/ZENG_20250620_114748_response.json"
   }
 ]
