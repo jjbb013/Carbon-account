@@ -2,7 +2,7 @@ name: 骑车+答题+回收 3 in 1
 
 on:
   schedule:
-    - cron: '1 4 * * *'  # UTC时间4:01，即北京时间12:01
+    - cron: '1 4 * * 1-5'  # UTC时间4:01，即北京时间12:01
   workflow_dispatch:
 
 jobs:
