@@ -4,11 +4,6 @@
     "barkUrl": "https://api.day.app/oZaeqGLJzRLSxW7dJqeACn",
     "updatedAt": "2025-07-04T03:36:09.773Z"
   },
-  "LongAoTian": {
-    "appToken": "eyJhbGciOiJIUzUxMiJ9.eyJjb21wYW55X2lkIjoxMDAwMDAwNzQyNzkwMTYyLCJ1c2VyX2lkIjozOTc2OTcsInVzZXJfa2V5IjoiMTAwMDAwMDc0Mjc5MDE2MjpvRmJBZDVPWHJ5bHVHSWRxVFhvT0FIaU84QTZ3OjRlMTNmNzk3LTk1ODMtNGJkYS05NGIwLTgwODMxNjNkYjE0ZCIsInVzZXJuYW1lIjoib0ZiQWQ1T1hyeWx1R0lkcVRYb09BSGlPOEE2dyJ9.b5yl3OCuXoNTbhNwtZWPn_oBGZTjo4l7ZekBetCqClbY6Any1kApXlJAowiNwRWv-pjkxIKWiQzQBaTcnsZlBg",
-    "barkUrl": "https://api.day.app/oZaeqGLJzRLSxW7dJqeACn",
-    "updatedAt": "2025-06-19T17:39:36.493Z"
-  },
   "MarsWang": {
     "appToken": "eyJhbGciOiJIUzUxMiJ9.eyJjb21wYW55X2lkIjoxMDAwMDAwNzQyNzkwMTYyLCJ1c2VyX2lkIjozOTQzODYsInVzZXJfa2V5IjoiMTAwMDAwMDc0Mjc5MDE2MjpvRmJBZDVKODRPelczMWVVQkl5NjA2M3lDRlZrOjk2Mzc5ODU5LTQ2NjEtNDA3Yi1iOWIxLTQ3YWFlNjIxODg5YiIsInVzZXJuYW1lIjoib0ZiQWQ1Sjg0T3pXMzFlVUJJeTYwNjN5Q0ZWayJ9.jqPOSBqVmeAwkpSRNQuAXLyjKGivh3UatzPhpc7oel1fO4EpYQw3rKsYuiY1balmIwlK7V-3gzKmjwCoVKySKw",
     "barkUrl": "https://api.day.app/6y4y9Y5Ze4uAgiVuGgWtp7",
@@ -29,20 +24,10 @@
     "barkUrl": "https://api.day.app/QgYKcX53y38P4f6AAhZvTM",
     "updatedAt": "2025-06-20T02:30:55.639Z"
   },
-  "pangxiong": {
-    "appToken": "eyJhbGciOiJIUzUxMiJ9.eyJjb21wYW55X2lkIjoxMDAwMDAwNzQyNzkwMTYyLCJ1c2VyX2lkIjozOTk0NjUsInVzZXJfa2V5IjoiMTAwMDAwMDc0Mjc5MDE2MjpvRmJBZDVINFVMcXZhcVpGNVVNVURuWGRyZzF3OjZhZWRkMWFiLWJiNzMtNDVmNy04OWEzLWQxN2NmMjVlZGRiMSIsInVzZXJuYW1lIjoib0ZiQWQ1SDRVTHF2YXFaRjVVTVVEblhkcmcxdyJ9.OP79-AGm9N_0fZ1kh_xoTbR1gWuX-bq53n-DKfVlCdcKIWbTT6Oj9UWzB_a5kMEMIZ98E-XGperubG_MaldEJg",
-    "barkUrl": "https://api.day.app/iFmNvbCycb5iM9HHCCrikQ",
-    "updatedAt": "2025-06-23T10:19:09.757Z"
-  },
   "Sunny": {
     "appToken": "eyJhbGciOiJIUzUxMiJ9.eyJjb21wYW55X2lkIjoxMDAwMDAwMTU0MTQ3ODkwLCJ1c2VyX2lkIjo0MTM3NjQsInVzZXJfa2V5IjoiMTAwMDAwMDE1NDE0Nzg5MDpvRmJBZDVMaXJIcFk0bXJSLWZUMGR0czRBY2owOjhlOTlkMDBjLWY0NTAtNDgwNC05ZGVjLWJjYWRiZmEzYjc4NyIsInVzZXJuYW1lIjoib0ZiQWQ1TGlySHBZNG1yUi1mVDBkdHM0QWNqMCJ9.Gk6o8-B3NvrMNpGX3hd7q8-EQF2bn6srwPy8HY9vOecMo_B6LJf6BCOA7DhDbkJqi8QbKXsPQGnbGK0f1M3pwg",
     "barkUrl": "https://api.day.app/VqYivxYL9nQLe8n2A9p6w4",
     "updatedAt": "2025-07-01T07:39:38.276Z"
-  },
-  "cui": {
-    "appToken": "eyJhbGciOiJIUzUxMiJ9.eyJjb21wYW55X2lkIjoxMDAwMDAwNzQyNzkwMTYyLCJ1c2VyX2lkIjozOTk0MTUsInVzZXJfa2V5IjoiMTAwMDAwMDc0Mjc5MDE2MjpvRmJBZDVBUTFjMnFUSVJieUVZOVhaVEJzY0pJOmM0ZDJlMmZlLWQ3ZmEtNDFiNy05N2EzLTNmZTVlMGM1MjEwYSIsInVzZXJuYW1lIjoib0ZiQWQ1QVExYzJxVElSYnlFWTlYWlRCc2NKSSJ9.pyRihcUMq_naPpFTR3XuC0J2oXpnFXg0S4E4J55MzuwEp_uyBeHQJWOki7FCCtluimAA3gp03rnCSxUfh6F_FA",
-    "barkUrl": "https://api.day.app/xMBVxEAqLsgaHbwoBrfjmY",
-    "updatedAt": "2025-07-01T07:38:39.059Z"
   },
   "lm": {
     "appToken": "eyJhbGciOiJIUzUxMiJ9.eyJjb21wYW55X2lkIjoxMDAwMDAwNzQyNzkwMTYyLCJ1c2VyX2lkIjozOTQyNjgsInVzZXJfa2V5IjoiMTAwMDAwMDc0Mjc5MDE2MjpvRmJBZDVLbHNDcXJ4WWNaQVF3bTQ1X2VCMHNZOjE5YzU5ZTU2LTBiMzYtNDg4ZS1hMWUwLTI3MzdkMzNjZmQ3OSIsInVzZXJuYW1lIjoib0ZiQWQ1S2xzQ3FyeFljWkFRd200NV9lQjBzWSJ9.wqv18lhpAvf75gmHyDkU6iCbOKkm4f9SlpQpRW_N_YR9gmD5s44TTvfp7THFDbjSCy--q7yVfFGSNVND_d8xZQ",
