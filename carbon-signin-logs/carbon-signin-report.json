@@ -1,65 +1,38 @@
 [
   {
     "user": "Dan",
-    "timestamp": "2025-08-27T10:24:59+0800",
+    "timestamp": "2025-08-28T10:24:38+0800",
     "httpStatus": 200,
     "apiCode": "200",
     "apiMsg": "OK",
     "tokenInvalid": false,
-    "rawFile": "carbon-signin-logs/raw-responses/Dan_20250827_102456_response.json"
-  },
-  {
-    "user": "Daozhu",
-    "timestamp": "2025-08-27T10:25:00+0800",
-    "httpStatus": 200,
-    "apiCode": "600",
-    "apiMsg": "token校验失败",
-    "tokenInvalid": true,
-    "rawFile": "carbon-signin-logs/raw-responses/Daozhu_20250827_102459_response.json"
+    "rawFile": "carbon-signin-logs/raw-responses/Dan_20250828_102435_response.json"
   },
   {
     "user": "MarsWang",
-    "timestamp": "2025-08-27T10:25:04+0800",
+    "timestamp": "2025-08-28T10:24:40+0800",
     "httpStatus": 200,
     "apiCode": "200",
     "apiMsg": "OK",
     "tokenInvalid": false,
-    "rawFile": "carbon-signin-logs/raw-responses/MarsWang_20250827_102502_response.json"
-  },
-  {
-    "user": "Sunny",
-    "timestamp": "2025-08-27T10:25:05+0800",
-    "httpStatus": 200,
-    "apiCode": "600",
-    "apiMsg": "token校验失败",
-    "tokenInvalid": true,
-    "rawFile": "carbon-signin-logs/raw-responses/Sunny_20250827_102504_response.json"
+    "rawFile": "carbon-signin-logs/raw-responses/MarsWang_20250828_102438_response.json"
   },
   {
     "user": "Will",
-    "timestamp": "2025-08-27T10:25:08+0800",
+    "timestamp": "2025-08-28T10:24:42+0800",
     "httpStatus": 200,
     "apiCode": "200",
     "apiMsg": "OK",
     "tokenInvalid": false,
-    "rawFile": "carbon-signin-logs/raw-responses/Will_20250827_102506_response.json"
+    "rawFile": "carbon-signin-logs/raw-responses/Will_20250828_102440_response.json"
   },
   {
     "user": "ZENG",
-    "timestamp": "2025-08-27T10:25:10+0800",
+    "timestamp": "2025-08-28T10:24:44+0800",
     "httpStatus": 200,
     "apiCode": "200",
     "apiMsg": "OK",
     "tokenInvalid": false,
-    "rawFile": "carbon-signin-logs/raw-responses/ZENG_20250827_102508_response.json"
-  },
-  {
-    "user": "lm",
-    "timestamp": "2025-08-27T10:25:12+0800",
-    "httpStatus": 200,
-    "apiCode": "600",
-    "apiMsg": "token校验失败",
-    "tokenInvalid": true,
-    "rawFile": "carbon-signin-logs/raw-responses/lm_20250827_102510_response.json"
+    "rawFile": "carbon-signin-logs/raw-responses/ZENG_20250828_102442_response.json"
   }
 ]
